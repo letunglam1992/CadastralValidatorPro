@@ -1,6 +1,6 @@
 {
  "rule_pack_id": "son_la_draft",
- "rule_pack_version": "draft-3",
+ "rule_pack_version": "draft-4",
  "approval_status": "DRAFT",
  "jurisdiction": "Sơn La",
  "profile_label": "Bộ quy tắc kiểm tra offline cấu hình (KHÔNG phải chứng nhận LANDINFO)",
@@ -309,7 +309,8 @@
    "auto_fix_policy": "NONE",
    "test_case_id": "test_area_delta",
    "enabled": true,
-   "verified_at": "2026-11-21"
+   "verified_at": "2026-11-21",
+   "user_acceptance": "21/11/2026: người dùng xác nhận kết quả trên DC8 (thửa 45) và DC10 (16 thửa)."
   },
   {
    "rule_id": "AREA-002",

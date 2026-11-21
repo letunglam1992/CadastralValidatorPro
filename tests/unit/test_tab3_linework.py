@@ -58,6 +58,7 @@ def test_dangle(validator):
     assert len(d) == 1
     assert abs(d[0].x - (X0 + 10)) < 1e-6 and abs(d[0].y - (Y0 + 25)) < 1e-6
     assert "SPUR" in d[0].source_element_ids
+    assert d[0].evidence["khoang_ho_m"] == 5.0 and "hở" in d[0].message
 
 
 def test_open_boundary_undershoot_within_snap_is_closed(validator):

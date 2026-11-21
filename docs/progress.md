@@ -63,3 +63,8 @@
 - Heuristic bảng thống kê siết lại (cụm ≤ 100 m, ≥ 3×3, ≤ 20 cm giấy, không phải dải hẹp) — bản cũ gộp nhầm 513 nhãn DC2 thành "bảng". Bảng DC2 (nhiều cột giãn rộng) chỉ nhận một phần → nên khai báo exclusion_boxes.
 - Thêm Level G (đường) vào ranh không cải thiện → không dùng.
 - Kết quả: DC1 296 lỗi, DC2 1.493, DC8 106, DC9 691, DC10 1.032. Sai diện tích: DC2 thửa 487; DC8 thửa 45; DC10 16 thửa.
+
+## Lượt 9 — 21/11/2026: xác nhận của người dùng
+- Đồng ý độ cao tự động theo DO-CAO; DC2 chỉ có ranh ở L, THUA; kết quả sai diện tích được xác nhận.
+- Không có cung tròn (type 16) bị bỏ sót; phần bị bỏ: ellipse/đường tròn (15), dimension (33), phần tử không đồ họa.
+- Đầu mút treo nay ghi khoảng hở tới nét gần nhất (hụt/thừa < 1 m; hở 1–5 m; ranh hở/đứt > 5 m). DC2: 33 điểm < 1 m, 205 điểm 1–5 m, 258 điểm > 5 m.

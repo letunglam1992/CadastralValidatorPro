@@ -149,6 +149,6 @@ def run_check(o: CheckOptions, progress: Optional[Callable[[int, int, str], None
             "area_reference": o.area_reference or cfg.levels.area_reference or "grid",
             "mean_height_m": o.mean_height_m if o.mean_height_m is not None else cfg.levels.mean_height_m,
             "level_profile_file": str(o.levels_path) if o.levels_path else None,
-            "app_version": "0.2.4"}
+            "app_version": "0.2.5"}
     paths = write_all(results, o.out_dir, meta, html=o.html)
     return results, {"meta": meta, "paths": {k: str(v) for k, v in paths.items()}}

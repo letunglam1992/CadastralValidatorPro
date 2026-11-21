@@ -158,10 +158,27 @@ class Validator:
             c = sl.geom.coords[0]
             self._issue(res, "DOAN_RANH_DO_DAI_0", f"Đoạn ranh độ dài 0 (Level {sl.level}).", c,
                         element_ids=[sl.element_id])
+        ntree = STRtree(lw.noded) if lw.noded else None
         for p, ids in lw.dangles:
+            gap = None
+            if ntree is not None:
+                own = [g for g in (lw.noded[int(j)] for j in ntree.query(p.buffer(0.001))) if g.distance(p) < 1e-6]
+                ds = [lw.noded[int(j)].distance(p) for j in ntree.query(p.buffer(50))
+                      if all(lw.noded[int(j)] is not o for o in own)]
+                gap = min(ds) if ds else None
+            if gap is None:
+                kind = "không có nét ranh nào trong 50 m"
+            elif gap < 1.0:
+                kind = f"hụt/thừa nét — cách nét gần nhất {gap:.2f} m"
+            elif gap < 5.0:
+                kind = f"hở — cách nét gần nhất {gap:.2f} m"
+            else:
+                kind = f"ranh hở/đứt — cách nét gần nhất {gap:.1f} m"
             self._issue(res, "DAU_MUT_TREO",
-                        f"Đầu mút treo (ranh không nối vào ranh khác) tại X={p.x:.3f}, Y={p.y:.3f}.",
-                        (p.x, p.y), element_ids=ids, suggested_fix="Kiểm tra thừa nét/thiếu nét; nối hoặc xóa đoạn "
+                        f"Đầu mút treo tại X={p.x:.3f}, Y={p.y:.3f} ({kind}).",
+                        (p.x, p.y), element_ids=ids,
+                        evidence={"khoang_ho_m": None if gap is None else round(gap, 3)},
+                        suggested_fix="Kiểm tra thừa nét/thiếu nét; nối hoặc xóa đoạn "
                         "thừa sau khi rà soát (mức B — cần phê duyệt).")
         res.stats["dau_mut_treo"] = len(lw.dangles)
 
