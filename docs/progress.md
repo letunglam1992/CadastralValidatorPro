@@ -32,3 +32,9 @@
 - Thêm phân giải Level theo tên (`domain/level_resolve.py`), tùy chọn `--levels` (CLI) và "Hồ sơ Level" (GUI), `exclusion_boxes`.
 - Thêm LAB-007 (heuristic): nhãn ngoài vùng xếp lưới hàng–cột → nghi Bảng thống kê, báo 1 dòng info.
 - Kết quả DC8 (THĂM DÒ, CRS chưa xác nhận, tỷ lệ 1:5000 suy từ KG-5000): 122 vùng; 151 nhãn số thửa, 123 diện tích, 156 loại đất; 95 nhãn thuộc bảng thống kê; còn 48 nhãn ngoài vùng, 28 vùng không nhãn, 17 trùng nhãn, 11 đầu mút treo, 1 trùng số thửa (119), 81 mã đất hệ cũ (N, M, 1L, Ao, Hg, GT, T). 53 test PASS.
+
+## Lượt 4 — 21/11/2026: DC8 xuất lại có tên Level; CRS xác nhận
+- Macro mới xuất bảng `levels` + `level_name`: khớp hoàn toàn ánh xạ dự phòng (C=65 … 0=75). Phân giải Level nay lấy từ `element.level_name`.
+- Người dùng xác nhận KTT Sơn La 104°00' → `VN2000_TM3_104` = VERIFIED_PARTIAL (chưa ghi số hiệu văn bản nguồn).
+- Diện tích DC8 (64 thửa có đúng 1 số thửa + 1 diện tích): lệch tương đối trung vị 0,019%, nhãn luôn LỚN hơn hình học ~1,9×10⁻⁴ ⇒ **sai khác hệ thống** cỡ k² của phép chiếu (k0 = 0,9999 → k² ≈ 0,9998): nghi diện tích nhãn tính theo mặt ellipsoid/thực địa hoặc phép chiếu khác. Cần người dùng xác nhận quy ước; KHÔNG tự hiệu chỉnh. Ngoại lệ: thửa 45 lệch +44 m² (2,86%).
+- 1:5000: rule pack chưa có ngưỡng hạn sai diện tích (Bo quy tac.json để trống) → AREA-001 không chạy.

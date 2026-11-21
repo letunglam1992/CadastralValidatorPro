@@ -3,7 +3,7 @@
   "profiles": [
     {
       "id": "VN2000_TM3_104",
-      "name": "VN-2000 TM-3°, KTT 104°00' (tham số người dùng cung cấp)",
+      "name": "VN-2000 TM-3°, KTT 104°00' — Sơn La (người dùng xác nhận 21/11/2026)",
       "central_meridian_deg": 104.0,
       "zone_width_deg": 3,
       "scale_factor": 0.9999,
@@ -11,10 +11,24 @@
       "false_northing_m": 0.0,
       "units": "m",
       "proj4": "+proj=tmerc +lat_0=0 +lon_0=104 +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs",
-      "axis_check": {"x_range_m": [400000.0, 650000.0], "y_range_m": [2200000.0, 2450000.0]},
+      "axis_check": {
+        "x_range_m": [
+          400000.0,
+          650000.0
+        ],
+        "y_range_m": [
+          2200000.0,
+          2450000.0
+        ]
+      },
       "source": "Bo quy tac.json (người dùng cung cấp)",
-      "verification_status": "PENDING_VERIFICATION",
-      "confirmed_by_user": false
+      "verification_status": "VERIFIED_PARTIAL",
+      "confirmed_by_user": true,
+      "confirmation": {
+        "date": "2026-11-21",
+        "by": "người dùng",
+        "evidence": "Ảnh bảng kinh tuyến trục theo tỉnh: dòng 3 'Sơn La — 104°00′' (chưa ghi số hiệu văn bản nguồn)"
+      }
     },
     {
       "id": "VN2000_TM3_108_30",
