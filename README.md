@@ -26,7 +26,11 @@ Phần mềm Windows (ưu tiên offline, giao diện tiếng Việt) hỗ trợ 
 
 *(Ảnh chụp từ dữ liệu tổng hợp `examples/`, không phải bản đồ thật.)*
 
-## Cài đặt và chạy
+## Cài đặt bằng bộ cài (Windows 10/11 x64)
+
+Tải `CadastralValidatorPro_Setup_<phiên bản>.exe` tại [Releases](https://github.com/letunglam1992/CadastralValidatorPro/releases) → chạy → Next. Không cần quyền quản trị (cài vào `%LOCALAPPDATA%\Programs\CadastralValidatorPro`). Báo cáo và log ghi vào `Documents\CadastralValidatorPro\`. Bộ cài chưa ký số: nếu SmartScreen cảnh báo, chọn **More info → Run anyway**. Bộ cài được build tự động bằng GitHub Actions (`.github/workflows/build-windows.yml`).
+
+## Cài đặt và chạy từ mã nguồn
 
 ```bat
 py -3.12 -m venv .venv

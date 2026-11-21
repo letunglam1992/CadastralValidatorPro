@@ -50,3 +50,8 @@
 - TT 23/2025 không sửa khoản 5 Điều 8 / Phụ lục 04 TT 26/2024; Phụ lục 01 (đã sửa) xác nhận KTT Sơn La 104°00' → CRS VERIFIED_CURRENT.
 - Hồ sơ Level DC8 mang thêm thuộc tính tờ: scale 1:5000, area_reference ground, mean_height_m 904 → CLI/GUI không cần nhập lại.
 - DC8: 1 lỗi diện tích (thửa 45, lệch 44,61 m² > 8,58 m²).
+
+## Lượt 7 — 21/11/2026: bộ cài Windows v0.2.0
+- PyInstaller (onedir) + Inno Setup, build trên GitHub Actions windows-latest, Python 3.12 (pyproj 3.8 yêu cầu ≥ 3.12). Workflow: cài thư viện → pytest (66 passed, 1 skipped) → đóng gói → mở EXE 15 giây không lỗi → ISCC → Release.
+- Release v0.2.0: CadastralValidatorPro_Setup_0.2.0.exe (53,6 MB). Chưa ký số. Chưa thử cài trên máy người dùng.
+- Đường dẫn khi chạy EXE: cấu hình trong gói (_MEIPASS), báo cáo/log tại Documents\CadastralValidatorPro.
