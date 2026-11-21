@@ -96,6 +96,7 @@ def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: st
                           is_synthetic=bool(src.get("is_synthetic", False))),
         scale=scale or sh.get("scale") or "1:1000", so_to=sh.get("so_to"),
         crs_profile_id=crs_profile_id or sh.get("crs_profile_id"), crs_confirmed=crs_confirmed,
+        level_table=list(data.get("levels", [])),
     )
 
 

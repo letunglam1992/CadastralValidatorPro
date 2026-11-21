@@ -1,0 +1,22 @@
+{
+  "profile_id": "DC8_PHIENG_LUONG_v1",
+  "classification": "APPROVED_PROJECT_SPEC",
+  "verification_status": "PENDING_VERIFICATION",
+  "note": "Sơ đồ Level do người dùng xác nhận theo TÊN ngày 21/11/2026 cho tờ DC8 (xã Phiêng Luông): ranh thửa = L, số thửa = TCT, diện tích = DIENTICH3, loại đất = C. Khung = KG-5000 (suy từ tên và hình vuông 3.000 m — CHƯA được người dùng xác nhận).",
+  "level_names": {
+    "boundary": ["L"],
+    "parcel_no": ["TCT"],
+    "area": ["DIENTICH3"],
+    "land_type": ["C"],
+    "frame": ["KG-5000"]
+  },
+  "name_to_number_fallback": {
+    "_source": "Suy từ thứ tự Level Manager (C, KG-5000, L, KC, DO-CAO, DIENTICH1, TCT, DIENTICH3, KHUNG-GOC, KHUNG-DC, 0) ánh xạ với Level.Number 65..75 trong DC8.dgn.cvp.json lần xuất 1. Chỉ dùng khi tệp trao đổi chưa có tên Level.",
+    "C": 65, "KG-5000": 66, "L": 67, "KC": 68, "DO-CAO": 69, "DIENTICH1": 70,
+    "TCT": 71, "DIENTICH3": 72, "KHUNG-GOC": 73, "KHUNG-DC": 74, "0": 75
+  },
+  "frame_levels": [],
+  "label_cell_names": ["NHANTHUA"],
+  "error_overlay_level": 63,
+  "exclusion_boxes": []
+}

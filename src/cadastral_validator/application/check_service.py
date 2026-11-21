@@ -30,6 +30,7 @@ class CheckOptions:
     field_map: dict[str, str] = field(default_factory=dict)
     dbf_encoding: Optional[str] = None
     gml_swap_xy: bool = False
+    levels_path: Optional[Path] = None
 
 
 def expand_inputs(paths: list[Path]) -> list[Path]:
@@ -61,7 +62,7 @@ def load_sheet(p: Path, o: CheckOptions):
 
 def run_check(o: CheckOptions, progress: Optional[Callable[[int, int, str], None]] = None,
               should_stop: Optional[Callable[[], bool]] = None) -> tuple[list[SheetResult], dict]:
-    cfg = load_app_config()
+    cfg = load_app_config(levels_path=o.levels_path)
     pack = load_rulepack(o.rulepack)
     validator = Validator(cfg, pack)
     files = expand_inputs(o.inputs)

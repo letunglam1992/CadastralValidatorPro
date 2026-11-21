@@ -13,6 +13,7 @@ from shapely import STRtree
 from shapely.geometry import Point, Polygon
 
 from ..domain.labels import count_by_kind, extract_labels
+from ..domain.level_resolve import resolve_levels
 from ..domain.models import Issue, Label, LabelKind, MapSheet, Parcel, SheetResult
 from ..domain.rules import RulePack
 from ..domain.textparse import count_decimals, parse_area, round_half_up, validate_land_code
@@ -100,8 +101,13 @@ class Validator:
 
     # ------------------------------------------------------- linework (DGN)
     def _validate_linework(self, sheet: MapSheet, res: SheetResult, params: dict):
-        lv = self.cfg.levels
+        lv, lvinfo = resolve_levels(self.cfg.levels, sheet)
+        res.stats["level_profile"] = self.cfg.levels.profile_id
+        res.stats["level_resolution"] = lvinfo
+        if lvinfo.get("missing"):
+            res.message = f"Không tìm thấy Level theo tên: {', '.join(sorted(lvinfo['missing']))}."
         labels, suggestions, opaque_cells = extract_labels(sheet.elements, lv, self.cfg.patterns)
+        labels = self._apply_exclusions(res, labels, lv)
         res.labels = labels
         counts = count_by_kind(labels)
         res.stats.update({"nhan_lop2": counts["land_type"], "nhan_lop4": counts["area"],
@@ -151,7 +157,69 @@ class Validator:
 
         regions = [r for r in lw.regions if frame is None or not self._is_frame_ring(r, frame)]
         res.stats["so_vung"] = len(regions)
+        labels = self._detect_stat_table(res, labels, regions)
         self._associate_and_check(res, regions, labels, params, frame)
+
+    def _apply_exclusions(self, res: SheetResult, labels: list[Label], lv) -> list[Label]:
+        if not lv.exclusion_boxes:
+            return labels
+        keep, n = [], 0
+        for lb in labels:
+            x, y = lb.anchor
+            if any(b[0] <= x <= b[2] and b[1] <= y <= b[3] for b in lv.exclusion_boxes):
+                n += 1
+            else:
+                keep.append(lb)
+        res.stats["nhan_trong_vung_loai_tru"] = n
+        return keep
+
+    def _detect_stat_table(self, res: SheetResult, labels: list[Label], regions: list[Polygon]) -> list[Label]:
+        """Heuristic: nhãn NGOÀI mọi vùng xếp thành lưới hàng–cột được coi là nghi thuộc bảng thống kê/chú dẫn
+        -> báo một dòng mức info, không tính vào lỗi nhãn ngoài vùng. Người dùng xác nhận bằng exclusion_boxes."""
+        if not self.pack.enabled("NHAN_TRONG_BANG_THONG_KE"):
+            return labels
+        tree = STRtree(regions) if regions else None
+        outside = []
+        for i, lb in enumerate(labels):
+            pt = Point(lb.anchor)
+            inside = tree is not None and any(regions[int(j)].intersects(pt) for j in tree.query(pt))
+            if not inside:
+                outside.append(i)
+        # Lưới bảng: nhãn cùng hàng (|dY| ≤ 1,5 m) với ≥ 3 nhãn khác VÀ cùng cột (|dX| ≤ 4 m) với ≥ 3 nhãn khác
+        # (chữ căn giữa nên X dao động vài mét — quan sát trên DC8 thật: hàng cách ~29,4 m).
+        P = [labels[i].anchor for i in outside]
+        table_idx: set[int] = set()
+        for a, i in enumerate(outside):
+            xa, ya = P[a]
+            row = sum(1 for b, (x, y) in enumerate(P) if b != a and abs(y - ya) <= 1.5)
+            col = sum(1 for b, (x, y) in enumerate(P) if b != a and abs(x - xa) <= 4.0)
+            if row >= 3 and col >= 3:
+                table_idx.add(i)
+        if not table_idx:
+            return labels
+        xs = [labels[i].anchor[0] for i in table_idx]
+        ys = [labels[i].anchor[1] for i in table_idx]
+        bx = (min(xs), min(ys), max(xs), max(ys))
+        # Nới khung bảng thêm 1 hàng (tiêu đề, dòng tổng) và 5 m hai bên
+        rows = sorted({round(y, 0) for y in ys})
+        gaps = sorted(b - a for a, b in zip(rows, rows[1:]) if b - a > 1.5)
+        my = 1.2 * gaps[len(gaps) // 2] if gaps else 2.0
+        for i in outside:
+            x, y = labels[i].anchor
+            if bx[0] - 5 <= x <= bx[2] + 5 and bx[1] - my <= y <= bx[3] + my:
+                table_idx.add(i)
+        xs = [labels[i].anchor[0] for i in table_idx]
+        ys = [labels[i].anchor[1] for i in table_idx]
+        bx = (min(xs), min(ys), max(xs), max(ys))
+        self._issue(res, "NHAN_TRONG_BANG_THONG_KE",
+                    f"{len(table_idx)} nhãn ngoài vùng xếp thành bảng (nghi Bảng thống kê/chú dẫn) trong khung "
+                    f"X {bx[0]:.1f}–{bx[2]:.1f}, Y {bx[1]:.1f}–{bx[3]:.1f}; không tính là lỗi nhãn ngoài vùng. "
+                    f"Nếu đúng, khai báo vào exclusion_boxes của hồ sơ Level.",
+                    ((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2),
+                    element_ids=[labels[i].source_element_id for i in sorted(table_idx)][:50],
+                    evidence={"box": [round(v, 3) for v in bx], "count": len(table_idx)})
+        res.stats["nhan_nghi_bang_thong_ke"] = len(table_idx)
+        return [lb for i, lb in enumerate(labels) if i not in table_idx]
 
     @staticmethod
     def _is_frame_ring(region: Polygon, frame: Polygon) -> bool:

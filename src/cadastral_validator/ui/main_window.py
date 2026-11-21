@@ -114,6 +114,10 @@ class CheckTab(QWidget):
         gl.addWidget(QLabel("Hệ tọa độ"), 3, 0); gl.addWidget(self.crs, 3, 1); gl.addWidget(self.crs_ok, 3, 2, 1, 2)
         self.rp = QLineEdit(str(CONFIG_DIR / "rulepacks" / "son_la_draft.json"))
         gl.addWidget(QLabel("Bộ quy tắc"), 4, 0); gl.addWidget(self.rp, 4, 1)
+        self.lvp = QComboBox(); self.lvp.addItem("Mặc định (config/levels.json)", None)
+        for f in sorted((CONFIG_DIR / "level_profiles").glob("*.json")):
+            self.lvp.addItem(f.stem, str(f))
+        gl.addWidget(QLabel("Hồ sơ Level"), 6, 0); gl.addWidget(self.lvp, 6, 1)
         st, msg = com_capability()
         self.com_lbl = QLabel(f"MicroStation COM: {st} — {msg}")
         self.com_lbl.setWordWrap(True)
@@ -196,7 +200,8 @@ class CheckTab(QWidget):
             raise ValueError("Đã tích xác nhận CRS nhưng chưa chọn hệ tọa độ.")
         return CheckOptions(inputs=inputs, out_dir=Path(self.out.text()), rulepack=Path(self.rp.text()),
                             scale=self.scale.currentText(), crs_profile_id=crs,
-                            crs_confirmed=self.crs_ok.isChecked() and bool(crs))
+                            crs_confirmed=self.crs_ok.isChecked() and bool(crs),
+                            levels_path=Path(self.lvp.currentData()) if self.lvp.currentData() else None)
 
     def start(self):
         try:

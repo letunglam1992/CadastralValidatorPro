@@ -71,6 +71,7 @@ class MapSheet:
     # Dữ liệu dạng polygon (GML/SHP): list[PolygonFeature]; khi có, kiểm tra theo nhánh polygon
     features: list["PolygonFeature"] = field(default_factory=list)
     coverage: Any = None           # vùng bao phủ hợp lệ do người dùng cung cấp (shapely Polygon)
+    level_table: list[dict[str, Any]] = field(default_factory=list)   # [{"number":67,"name":"L"}]
 
 
 @dataclass

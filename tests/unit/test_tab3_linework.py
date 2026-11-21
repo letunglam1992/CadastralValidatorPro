@@ -230,3 +230,34 @@ def test_windows_path_basename(tmp_path):
                  encoding="utf-8")
     s = load_exchange(p)
     assert s.file_name == "DC8.dgn" and s.sheet_id == "DC8"
+
+
+def test_stat_table_detection(validator):
+    """Bảng thống kê ngoài vùng thửa (lưới 4 cột x 5 hàng) -> 1 info, không sinh NHAN_NGOAI_VUNG."""
+    els = grid_elements()
+    k = 0
+    for r in range(5):
+        for c, (lvl, txt) in enumerate([(13, str(r + 1)), (4, "400.0"), (2, "ONT"), (13, str(r + 10))]):
+            k += 1
+            els.append(RawElement(id=f"TB{k}", type="text", level=lvl, text=txt,
+                                  origin=(X0 + 100 + c * 25 + (k % 3) * 0.8, Y0 + 100 - r * 29.4)))
+    els.append(RawElement(id="LONE", type="text", level=13, text="99", origin=(X0 - 50, Y0 - 50)))
+    res = validator.validate(sheet(els))
+    assert codes(res, "error") == ["NHAN_NGOAI_VUNG"]          # chỉ còn nhãn lẻ thật sự
+    t = [i for i in res.issues if i.code == "NHAN_TRONG_BANG_THONG_KE"]
+    assert len(t) == 1 and t[0].evidence["count"] == 20
+
+
+def test_level_names_resolution(validator):
+    """Hồ sơ Level theo TÊN (như DC8: L, TCT, DIENTICH3, C)."""
+    import copy
+    from cadastral_validator.application.validate_service import Validator
+    from cadastral_validator.infrastructure.config import CONFIG_DIR, load_app_config
+    cfg = load_app_config(levels_path=CONFIG_DIR / "level_profiles" / "dc8_phieng_luong.json")
+    remap = {10: (67, "L"), 13: (71, "TCT"), 4: (72, "DIENTICH3"), 2: (65, "C"), 54: (66, "KG-5000")}
+    els = copy.deepcopy(grid_elements())
+    for e in els:
+        e.level, e.extra["level_name"] = remap[e.level]
+    res = Validator(cfg, validator.pack).validate(sheet(els))
+    assert res.status == "OK", codes(res)
+    assert res.stats["level_resolution"]["resolved"]["TCT"]["source"] == "element.level_name"

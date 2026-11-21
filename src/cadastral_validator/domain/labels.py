@@ -87,9 +87,9 @@ def extract_labels(elements: list[RawElement], lv: LevelProfile, patterns: Label
         level_kind[L] = LabelKind.AREA
     for L in lv.land_type_levels:
         level_kind[L] = LabelKind.LAND_TYPE
-    target_level = {LabelKind.PARCEL_NO.value: min(lv.parcel_no_levels),
-                    LabelKind.AREA.value: min(lv.area_levels),
-                    LabelKind.LAND_TYPE.value: min(lv.land_type_levels)}
+    target_level = {LabelKind.PARCEL_NO.value: min(lv.parcel_no_levels, default=-1),
+                    LabelKind.AREA.value: min(lv.area_levels, default=-1),
+                    LabelKind.LAND_TYPE.value: min(lv.land_type_levels, default=-1)}
 
     for el, cell_id in iter_text_elements(elements, lv.label_cell_names):
         raw = el.text or ""

@@ -25,3 +25,10 @@
 - Chữ tiếng Việt dùng bảng mã font MicroStation (ví dụ "XA8 PHI3NG LU4NG" = XÃ PHIÊNG LUÔNG) — cần bảng chuyển mã đã kiểm thử.
 - Bảng thống kê diện tích trong tờ chứa nhãn cùng Level với nhãn thửa → báo "nhãn ngoài vùng" giả. Cần cấu hình vùng loại trừ (G1.1).
 - Lỗi phần mềm phát hiện nhờ dữ liệu thật và đã sửa (có test hồi quy): độ dịch snap tính sai (báo 1.403 m), đưa khung tờ vào dựng vùng (mặc định nay tắt), tên tệp đường dẫn Windows.
+
+## Lượt 3 — 21/11/2026: hồ sơ Level theo TÊN cho DC8
+
+- Người dùng xác nhận: ranh = `L`, số thửa = `TCT`, diện tích = `DIENTICH3`, loại đất = `C`. Thêm `config/level_profiles/dc8_phieng_luong.json`; khung `KG-5000` (chưa xác nhận). Số Level dự phòng 65–75 suy từ thứ tự Level Manager — dùng đến khi có tệp xuất bằng macro mới (có `level_name`).
+- Thêm phân giải Level theo tên (`domain/level_resolve.py`), tùy chọn `--levels` (CLI) và "Hồ sơ Level" (GUI), `exclusion_boxes`.
+- Thêm LAB-007 (heuristic): nhãn ngoài vùng xếp lưới hàng–cột → nghi Bảng thống kê, báo 1 dòng info.
+- Kết quả DC8 (THĂM DÒ, CRS chưa xác nhận, tỷ lệ 1:5000 suy từ KG-5000): 122 vùng; 151 nhãn số thửa, 123 diện tích, 156 loại đất; 95 nhãn thuộc bảng thống kê; còn 48 nhãn ngoài vùng, 28 vùng không nhãn, 17 trùng nhãn, 11 đầu mút treo, 1 trùng số thửa (119), 81 mã đất hệ cũ (N, M, 1L, Ao, Hg, GT, T). 53 test PASS.

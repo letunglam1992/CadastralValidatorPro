@@ -35,6 +35,12 @@ class LevelProfile:
     normalization_source_levels: set[int]
     error_overlay_level: int
     profile_id: str = ""
+    # Khai báo theo TÊN Level (ưu tiên khi có): role -> {tên}; role ∈ boundary, frame, parcel_no, area, land_type
+    role_names: dict = field(default_factory=dict)
+    # Số Level dự phòng khi tệp trao đổi chưa có tên Level (phải ghi rõ nguồn)
+    name_to_number_fallback: dict = field(default_factory=dict)
+    exclusion_boxes: list = field(default_factory=list)   # [[x0,y0,x1,y1], ...] vùng bỏ qua nhãn (bảng, chú dẫn)
+    verification_status: str = "PENDING_VERIFICATION"
 
 
 @dataclass
@@ -66,6 +72,8 @@ class AppConfig:
 def load_levels(path: Path | None = None) -> LevelProfile:
     path = path or CONFIG_DIR / "levels.json"
     d = _load(path)
+    d.setdefault("boundary_levels", [])
+    d.setdefault("label_levels", {"parcel_no": [], "area": [], "land_type": []})
     try:
         ll = d["label_levels"]
         return LevelProfile(
@@ -78,6 +86,11 @@ def load_levels(path: Path | None = None) -> LevelProfile:
             normalization_source_levels=set(map(int, d.get("normalization_candidates", {}).get("source_levels", []))),
             error_overlay_level=int(d.get("error_overlay_level", 63)),
             profile_id=d.get("profile_id", ""),
+            role_names={k: {str(n) for n in v} for k, v in d.get("level_names", {}).items()},
+            name_to_number_fallback={str(k): int(v) for k, v in d.get("name_to_number_fallback", {}).items()
+                                     if not str(k).startswith("_")},
+            exclusion_boxes=[list(map(float, b)) for b in d.get("exclusion_boxes", [])],
+            verification_status=d.get("verification_status", "PENDING_VERIFICATION"),
         )
     except KeyError as e:
         raise ConfigError(f"{path.name}: thiếu trường {e}") from e
@@ -116,8 +129,8 @@ def load_crs_profiles(path: Path | None = None) -> dict[str, dict[str, Any]]:
     return {p["id"]: p for p in d.get("profiles", [])}
 
 
-def load_app_config(config_dir: Path | None = None) -> AppConfig:
+def load_app_config(config_dir: Path | None = None, levels_path: Path | None = None) -> AppConfig:
     cd = config_dir or CONFIG_DIR
-    return AppConfig(levels=load_levels(cd / "levels.json"), land=load_land_catalog(cd / "land_types.json"),
+    return AppConfig(levels=load_levels(levels_path or cd / "levels.json"), land=load_land_catalog(cd / "land_types.json"),
                      patterns=load_patterns(cd / "label_patterns.json"),
                      crs_profiles=load_crs_profiles(cd / "crs_profiles.json"))
