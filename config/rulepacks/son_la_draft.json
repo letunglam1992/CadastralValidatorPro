@@ -1,0 +1,48 @@
+{
+  "rule_pack_id": "son_la_draft",
+  "rule_pack_version": "draft-1",
+  "approval_status": "DRAFT",
+  "jurisdiction": "Sơn La",
+  "profile_label": "Bộ quy tắc kiểm tra offline cấu hình (KHÔNG phải chứng nhận LANDINFO)",
+  "note": "Mọi ngưỡng là SOFTWARE_HEURISTIC hoặc LOCAL_CONFIG chờ xác minh. Không được gọi là tiêu chuẩn pháp luật. Ngưỡng theo tỷ lệ lấy từ 'Bo quy tac.json' do người dùng cung cấp; ngưỡng mặc định lấy từ Master Prompt V2.2 và video tham khảo.",
+  "default_scale": "1:1000",
+  "scale_params": {
+    "1:500":   {"snap_tolerance_m": 0.005, "dangle_max_length_m": 0.05, "overlap_error_threshold_m2": 0.01, "sliver_max_area_m2": 0.5,  "sliver_compactness_threshold": 0.15, "area_decimal_places": 1, "area_abs_tolerance_m2": 0.1, "min_parcel_warning_area_m2": 1.0},
+    "1:1000":  {"snap_tolerance_m": 0.01,  "dangle_max_length_m": 0.1,  "overlap_error_threshold_m2": 0.05, "sliver_max_area_m2": 1.0,  "sliver_compactness_threshold": 0.15, "area_decimal_places": 1, "area_abs_tolerance_m2": 0.1, "min_parcel_warning_area_m2": 2.0},
+    "1:2000":  {"snap_tolerance_m": 0.02,  "dangle_max_length_m": 0.2,  "overlap_error_threshold_m2": 0.1,  "sliver_max_area_m2": 2.0,  "sliver_compactness_threshold": 0.15, "area_decimal_places": 1, "area_abs_tolerance_m2": 0.2, "min_parcel_warning_area_m2": 5.0},
+    "1:5000":  {"snap_tolerance_m": 0.05,  "dangle_max_length_m": 0.5,  "overlap_error_threshold_m2": 0.5,  "sliver_max_area_m2": 10.0, "sliver_compactness_threshold": 0.15, "area_decimal_places": null, "area_abs_tolerance_m2": null, "min_parcel_warning_area_m2": 20.0},
+    "1:10000": {"snap_tolerance_m": 0.1,   "dangle_max_length_m": 1.0,  "overlap_error_threshold_m2": 1.0,  "sliver_max_area_m2": 25.0, "sliver_compactness_threshold": 0.15, "area_decimal_places": null, "area_abs_tolerance_m2": null, "min_parcel_warning_area_m2": 50.0}
+  },
+  "general_params": {
+    "unlabeled_region_min_area_m2": 2.0,
+    "label_near_boundary_m": 0.2,
+    "dangle_near_frame_m": 0.1,
+    "outside_frame_ratio": 0.5,
+    "include_frame_in_noding": true,
+    "non_parcel_land_codes": ["DGT", "DTL", "SON", "MNC"],
+    "non_parcel_note": "Vùng chỉ có nhãn loại đất thuộc danh sách này (giao thông/thủy hệ) và không có số thửa được báo mức info, không coi là lỗi. Cấu hình tham khảo, cần xác nhận."
+  },
+  "rules": [
+    {"rule_id": "PRE-001", "code": "THIEU_NHOM_NHAN", "title": "Tờ thiếu một nhóm nhãn (lớp 2/4/13) ngay từ đầu", "severity": "error", "scope": "sheet", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_precheck_missing_group", "enabled": true},
+    {"rule_id": "CRS-001", "code": "CRS_CHUA_XAC_NHAN", "title": "CRS/kinh tuyến trục chưa được người dùng xác nhận", "severity": "warning", "scope": "sheet", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [{"document_id": "TT26_2024", "article": "CẦN BỔ SUNG"}], "auto_fix_policy": "NONE", "test_case_id": "test_crs_unconfirmed", "enabled": true},
+    {"rule_id": "CRS-002", "code": "TOA_DO_NGOAI_KHOANG", "title": "Tọa độ nằm ngoài khoảng kiểm tra của profile (nghi đảo trục X-Y)", "severity": "warning", "scope": "sheet", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_axis_swap", "enabled": true},
+    {"rule_id": "GEO-001", "code": "HINH_HOC_KHONG_HOP_LE", "title": "Polygon tự cắt / vòng không hợp lệ", "severity": "error", "scope": "parcel", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_invalid_polygon", "enabled": true},
+    {"rule_id": "GEO-002", "code": "DOAN_RANH_DO_DAI_0", "title": "Đoạn ranh có chiều dài bằng 0", "severity": "warning", "scope": "element", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_zero_length", "enabled": true},
+    {"rule_id": "TOP-001", "code": "DAU_MUT_TREO", "title": "Đầu mút treo / ranh chưa khép kín", "severity": "error", "scope": "element", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_dangle", "enabled": true},
+    {"rule_id": "TOP-002", "code": "CHONG_LAN", "title": "Chồng lấn giữa các thửa (dữ liệu dạng polygon)", "severity": "error", "scope": "parcel", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_overlap", "enabled": true},
+    {"rule_id": "TOP-003", "code": "KHE_HO", "title": "Khe hở / mảnh vụn trong vùng bao phủ hợp lệ", "severity": "error", "scope": "sheet", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_gap_with_coverage", "enabled": true},
+    {"rule_id": "TOP-004", "code": "THUA_NGOAI_KHUNG", "title": "Thửa nằm phần lớn (>50%) ngoài khung tờ", "severity": "warning", "scope": "parcel", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_outside_frame", "enabled": true},
+    {"rule_id": "LAB-001", "code": "VUNG_KHONG_NHAN", "title": "Vùng thửa không có nhãn số thửa", "severity": "error", "scope": "parcel", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [{"document_id": "TT26_2024", "article": "CẦN BỔ SUNG"}], "auto_fix_policy": "NONE", "test_case_id": "test_missing_label", "enabled": true},
+    {"rule_id": "LAB-002", "code": "TRUNG_NHAN", "title": "Một vùng chứa nhiều hơn một nhãn cùng loại", "severity": "error", "scope": "parcel", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_duplicate_label", "enabled": true},
+    {"rule_id": "LAB-003", "code": "NHAN_NGOAI_VUNG", "title": "Nhãn nằm ngoài mọi vùng thửa", "severity": "error", "scope": "label", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_label_outside", "enabled": true},
+    {"rule_id": "LAB-004", "code": "NHAN_SAT_RANH", "title": "Điểm đặt nhãn nằm sát/đè ranh (AMBIGUOUS)", "severity": "warning", "scope": "label", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_label_on_boundary", "enabled": true},
+    {"rule_id": "LAB-005", "code": "THIEU_NHAN_PHU", "title": "Thửa có số thửa nhưng thiếu nhãn diện tích hoặc loại đất", "severity": "warning", "scope": "parcel", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_missing_secondary", "enabled": true},
+    {"rule_id": "LAB-006", "code": "TRUNG_SO_THUA", "title": "Trùng số hiệu thửa trên cùng tờ", "severity": "error", "scope": "sheet", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_duplicate_parcel_no", "enabled": true},
+    {"rule_id": "AREA-001", "code": "SAI_DIEN_TICH", "title": "Chênh lệch diện tích nhãn và diện tích hình học vượt ngưỡng", "severity": "warning", "scope": "parcel", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [{"document_id": "TT26_2024", "article": "CẦN BỔ SUNG - công thức hạn sai diện tích"}], "auto_fix_policy": "NONE", "test_case_id": "test_area_delta", "enabled": true},
+    {"rule_id": "AREA-002", "code": "DIEN_TICH_KHONG_PHAI_SO", "title": "Nhãn diện tích không phải số hợp lệ", "severity": "error", "scope": "label", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_area_not_number", "enabled": true},
+    {"rule_id": "AREA-003", "code": "SAI_QUY_CACH_LAM_TRON", "title": "Số chữ số thập phân của nhãn diện tích khác cấu hình", "severity": "warning", "scope": "label", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_area_decimals", "enabled": true},
+    {"rule_id": "AREA-004", "code": "THUA_NHO", "title": "Diện tích thửa nhỏ bất thường, cần kiểm tra", "severity": "warning", "scope": "parcel", "classification": "SOFTWARE_HEURISTIC", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "NONE", "test_case_id": "test_small_parcel", "enabled": true},
+    {"rule_id": "CODE-001", "code": "MA_DAT_KHONG_HOP_LE", "title": "Mã loại đất không thuộc danh mục cấu hình", "severity": "warning", "scope": "parcel", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [{"document_id": "LUAT_DD_2024", "article": "CẦN BỔ SUNG"}], "auto_fix_policy": "SUGGEST_ONLY", "test_case_id": "test_land_code", "enabled": true},
+    {"rule_id": "NORM-001", "code": "DE_XUAT_CHUYEN_LEVEL", "title": "Nhãn ở Level không chuẩn, đề xuất chuyển Level (chỉ preview)", "severity": "info", "scope": "label", "classification": "LOCAL_CONFIG", "verification_status": "PENDING_VERIFICATION", "legal_refs": [], "auto_fix_policy": "PREVIEW_ONLY", "test_case_id": "test_level_normalization", "enabled": true}
+  ]
+}

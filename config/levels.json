@@ -1,0 +1,24 @@
+{
+  "profile_id": "level_profile_tham_khao_v1",
+  "classification": "LOCAL_CONFIG",
+  "verification_status": "PENDING_VERIFICATION",
+  "note": "Sơ đồ Level THAM KHẢO lấy từ quan sát video GML2DGN 1.2 và Master Prompt. Chưa đối chiếu Bảng phân lớp Phụ lục TT 26/2024 (đã sửa đổi bởi TT 23/2025). Không coi là quy phạm.",
+  "boundary_levels": [10, 22, 23, 31, 32],
+  "frame_levels": [54],
+  "label_levels": {
+    "land_type": [2],
+    "area": [4],
+    "parcel_no": [13]
+  },
+  "label_cell_names": ["NHANTHUA"],
+  "error_overlay_level": 63,
+  "normalization_candidates": {
+    "note": "Nhãn nằm ở các Level này sẽ được ĐỀ XUẤT chuyển về Level chuẩn theo pattern; chỉ preview, không tự ghi.",
+    "source_levels": [11, 12, 14, 15, 16]
+  },
+  "special_boundary_levels": {
+    "DGT": 23,
+    "SON": 31,
+    "DTL": 32
+  }
+}

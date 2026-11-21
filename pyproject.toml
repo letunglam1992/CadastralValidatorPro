@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cadastral-validator-pro"
+version = "0.1.0"
+description = "Kiểm tra, chuẩn hóa dữ liệu bản đồ địa chính Việt Nam (offline) — giai đoạn G1: Tab 3 kiểm tra DGN"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+  "shapely>=2.0",
+  "pyproj>=3.6",
+  "pyshp>=2.3",
+  "lxml>=5.0",
+  "openpyxl>=3.1",
+  "olefile>=0.46",
+  "PySide6>=6.6",
+  "pywin32>=306; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pyinstaller>=6"]
+
+[project.scripts]
+cadastral-validator = "cadastral_validator.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

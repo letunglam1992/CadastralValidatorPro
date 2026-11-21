@@ -1,0 +1,23 @@
+# Dữ liệu địa chính thật KHÔNG được đưa lên repo công khai
+*.dgn
+*.DGN
+*.cvp.json
+*.gml
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+data/
+output/
+logs/
+scripts/probe_result.json
+
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+build/
+dist/
+*.spec
+*.tmp

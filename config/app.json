@@ -1,0 +1,16 @@
+{
+  "app_name": "CadastralValidatorPro",
+  "version": "0.1.0-g1",
+  "language": "vi",
+  "offline_only": true,
+  "output_dir": "output",
+  "log_dir": "logs",
+  "default_rulepack": "config/rulepacks/son_la_draft.json",
+  "default_crs_profile": null,
+  "local_http": {"bind": "127.0.0.1", "enabled": false},
+  "microstation": {
+    "progid": "MicroStationDGN.Application",
+    "progid_status": "NOT_TESTED",
+    "open_read_only": true
+  }
+}
