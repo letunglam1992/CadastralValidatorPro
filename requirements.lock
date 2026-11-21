@@ -1,4 +1,4 @@
-# Phiên bản đã chạy test PASS (Linux, Python 3.13, 21/11/2026). Chưa kiểm thử trên Windows/Python 3.11.
+# Phiên bản đã chạy test PASS (Linux Py3.13; build Windows dùng Python 3.12 — pyproj 3.8 cần Python >= 3.12).
 shapely==2.2.0
 pyproj==3.8.0
 pyshp==3.1.9

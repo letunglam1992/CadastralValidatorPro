@@ -1,9 +1,9 @@
 @echo off
-REM Đóng gói EXE bằng PyInstaller — CHƯA BUILD THỬ (G7). Chạy trên Windows 10/11 x64, Python 3.11.
+REM Đóng gói EXE bằng PyInstaller — CHƯA BUILD THỬ (G7). Chạy trên Windows 10/11 x64, Python 3.12.
 chcp 65001 >nul
 setlocal
 if not exist .venv (
-  py -3.11 -m venv .venv || goto :err
+  py -3.12 -m venv .venv || goto :err
 )
 call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip

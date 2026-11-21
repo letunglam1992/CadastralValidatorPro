@@ -29,7 +29,7 @@ Phần mềm Windows (ưu tiên offline, giao diện tiếng Việt) hỗ trợ 
 ## Cài đặt và chạy
 
 ```bat
-py -3.11 -m venv .venv
+py -3.12 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.lock
 python -m pytest -q
