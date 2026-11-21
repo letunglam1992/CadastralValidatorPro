@@ -74,10 +74,20 @@ def _basename(p: str) -> str:
 def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: str | None = None,
                   crs_confirmed: bool = False) -> MapSheet:
     path = Path(path)
+    text = path.read_text(encoding="utf-8")
+    repaired = False
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(text)
     except json.JSONDecodeError as e:
-        raise ExchangeError(f"{path.name}: JSON lỗi dòng {e.lineno}: {e.msg}") from e
+        if "escape" not in e.msg:
+            raise ExchangeError(f"{path.name}: JSON lỗi dòng {e.lineno}: {e.msg}") from e
+        # Macro bản 21/11/2026 15:5x ghi '\' đơn (lỗi đã sửa): nhân đôi dấu '\' không thuộc escape JSON hợp lệ
+        fixed = re.sub(r'\\(?!["\\/bfnrtu])', r"\\\\", text)
+        try:
+            data = json.loads(fixed)
+            repaired = True
+        except json.JSONDecodeError as e2:
+            raise ExchangeError(f"{path.name}: JSON lỗi dòng {e2.lineno}: {e2.msg}") from e2
     if data.get("schema") != SCHEMA:
         raise ExchangeError(f"{path.name}: schema '{data.get('schema')}' không phải {SCHEMA}")
     src = data.get("source", {})
@@ -88,7 +98,7 @@ def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: st
     sid = str(sh.get("sheet_id") or path.stem)
     if sid.lower().endswith(".dgn"):  # macro VBA ghi tên tệp đầy đủ
         sid = sid[:-4]
-    return MapSheet(
+    sheet = MapSheet(
         sheet_id=sid, file_name=_basename(src.get("path") or path.name),
         elements=[_el_from(e, path.name) for e in data.get("elements", [])],
         source=SourceInfo(path=str(src.get("path") or path), sha256=src.get("sha256"), fmt="dgn_exchange",
@@ -98,6 +108,9 @@ def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: st
         crs_profile_id=crs_profile_id or sh.get("crs_profile_id"), crs_confirmed=crs_confirmed,
         level_table=list(data.get("levels", [])),
     )
+    if repaired:
+        sheet.source.reader += " (đã tự sửa dấu \\ trong tệp xuất)"
+    return sheet
 
 
 def save_exchange(sheet: MapSheet, path: str | Path) -> None:

@@ -85,7 +85,10 @@ def test_real_dgn_probe_is_v8_and_reader_blocked_without_com(tmp_path):
         assert prof.version == "V8"
         assert prof.zlib_ok is True
         assert prof.sha256 == before
-    results, _ = run_check(CheckOptions(inputs=files[:1], out_dir=tmp_path, html=False))
+    no_side = [f for f in files if not f.with_name(f.name + ".cvp.json").exists()]
+    if not no_side:
+        pytest.skip("Mọi tệp DGN đã có tệp xuất .cvp.json")
+    results, _ = run_check(CheckOptions(inputs=no_side[:1], out_dir=tmp_path, html=False))
     assert results[0].status == "KHONG_DOC_DUOC"
     assert "Windows" in results[0].message or "pywin32" in results[0].message or "ProgID" in results[0].message
 
@@ -127,3 +130,14 @@ def test_choose_dgn_without_export_gives_guidance(tmp_path):
     res, _ = run_check(CheckOptions(inputs=[dgn], out_dir=tmp_path / "o", html=False))
     assert res[0].status == "KHONG_DOC_DUOC"
     assert "XuatThuMucJSON" in res[0].message
+
+
+def test_repair_lone_backslash_from_buggy_macro(tmp_path):
+    """Hồi quy DC1 thật: macro bản lỗi ghi 'K:\\My Drive\\...' (dấu \\ đơn) -> JSON không hợp lệ."""
+    from cadastral_validator.adapters.dgn_exchange import load_exchange
+    raw = ('{"schema":"cvp.dgn_exchange/1","source":{"path":"K:\\My Drive\\23. Claude\\Liem\\DC1.dgn"},'
+           '"sheet":{"sheet_id":"DC1.dgn"},"units":{"master":"m"},"elements":[]}')
+    p = tmp_path / "DC1.dgn.cvp.json"
+    p.write_text(raw, encoding="utf-8")
+    s = load_exchange(p)
+    assert s.file_name == "DC1.dgn" and "tự sửa" in s.source.reader

@@ -167,6 +167,7 @@ class CheckTab(QWidget):
         self.issues.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.issues.setSortingEnabled(True)
         self.issues.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.issues.setWordWrap(True)
         bl.addWidget(self.issues)
         split.addWidget(box)
         split.setSizes([180, 320])
@@ -257,6 +258,8 @@ class CheckTab(QWidget):
                     r.message]
             for c, v in enumerate(vals):
                 it = QTableWidgetItem(str(v))
+                if c == 8 and r.message:
+                    it.setToolTip(r.message)
                 if c == 1:
                     it.setForeground(Qt.darkGreen if r.status == "OK" else Qt.red)
                 self.sheets.setItem(row, c, it)
@@ -281,6 +284,13 @@ class CheckTab(QWidget):
         allow = {k for k, w in (("error", self.f_err), ("warning", self.f_warn), ("info", self.f_info)) if w.isChecked()}
         q = self.search.text().strip().lower()
         pn = {p.internal_id: (p.parcel_no or "") for p in r.parcels}
+        if r.status == "KHONG_DOC_DUOC" and r.message:
+            self.issues.insertRow(0)
+            for c, v in enumerate(["Lỗi đọc tệp", "KHONG_DOC_DUOC", r.message, "", "", ""]):
+                it = QTableWidgetItem(v)
+                it.setToolTip(r.message)
+                self.issues.setItem(0, c, it)
+            self.issues.resizeRowToContents(0)
         for i in r.issues:
             if i.severity not in allow:
                 continue
@@ -311,7 +321,7 @@ class CheckTab(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CadastralValidatorPro 0.2.1 — Kiểm tra dữ liệu bản đồ địa chính")
+        self.setWindowTitle("CadastralValidatorPro 0.2.2 — Kiểm tra dữ liệu bản đồ địa chính")
         self.resize(1280, 800)
         w = QWidget(); lay = QHBoxLayout(w); lay.setContentsMargins(0, 0, 0, 0); lay.setSpacing(0)
         left = QFrame(); left.setFixedWidth(270); ll = QVBoxLayout(left); ll.setContentsMargins(0, 0, 0, 0)

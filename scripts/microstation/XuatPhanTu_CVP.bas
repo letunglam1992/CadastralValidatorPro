@@ -22,7 +22,7 @@ Private Function JsonStr(ByVal s As String) As String
         If c < 0 Then c = c + 65536
         Select Case c
             Case 34: r = r & "\" & Chr(34)
-            Case 92: r = r & "\"
+            Case 92: r = r & "\\"
             Case 10: r = r & "\n"
             Case 13: r = r & "\r"
             Case 9: r = r & "\t"
