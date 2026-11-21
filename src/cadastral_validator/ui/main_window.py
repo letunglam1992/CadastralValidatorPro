@@ -105,8 +105,10 @@ class CheckTab(QWidget):
         self.out = QLineEdit(str(OUTPUT_DIR))
         b3 = QPushButton("Chọn…"); b3.clicked.connect(self.pick_out)
         gl.addWidget(QLabel("Thư mục báo cáo"), 1, 0); gl.addWidget(self.out, 1, 1); gl.addWidget(b3, 1, 2)
-        self.scale = QComboBox(); self.scale.addItems(["1:500", "1:1000", "1:2000", "1:5000", "1:10000"])
-        self.scale.setCurrentText("1:1000")
+        self.scale = QComboBox()
+        self.scale.addItem("Theo hồ sơ Level (không có thì 1:1000)", None)
+        for sc in ["1:200", "1:500", "1:1000", "1:2000", "1:5000", "1:10000"]:
+            self.scale.addItem(sc, sc)
         self.crs = QComboBox(); self.crs.addItem("— chưa chọn —", None)
         for pid, p in load_crs_profiles().items():
             self.crs.addItem(p["name"], pid)
@@ -200,7 +202,8 @@ class CheckTab(QWidget):
         if self.crs_ok.isChecked() and not crs:
             raise ValueError("Đã tích xác nhận CRS nhưng chưa chọn hệ tọa độ.")
         return CheckOptions(inputs=inputs, out_dir=Path(self.out.text()), rulepack=Path(self.rp.text()),
-                            scale=self.scale.currentText(), crs_profile_id=crs,
+                            scale=self.scale.currentData() or "1:1000",
+                            scale_from_cli=self.scale.currentData() is not None, crs_profile_id=crs,
                             crs_confirmed=self.crs_ok.isChecked() and bool(crs),
                             levels_path=Path(self.lvp.currentData()) if self.lvp.currentData() else None)
 

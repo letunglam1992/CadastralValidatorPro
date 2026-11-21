@@ -22,7 +22,7 @@ Private Function JsonStr(ByVal s As String) As String
         If c < 0 Then c = c + 65536
         Select Case c
             Case 34: r = r & "\" & Chr(34)
-            Case 92: r = r & "\\"
+            Case 92: r = r & "\"
             Case 10: r = r & "\n"
             Case 13: r = r & "\r"
             Case 9: r = r & "\t"
@@ -106,40 +106,41 @@ Private Function ElemJson(el As Element) As String
     ElemJson = s & "}"
 End Function
 
-Private Function LevelsJson() As String
+Private Function LevelsJson(df As DesignFile) As String
     Dim lvl As Level, r As String
     r = ""
-    For Each lvl In ActiveDesignFile.Levels
+    For Each lvl In df.Levels
         If r <> "" Then r = r & ","
         r = r & "{""number"":" & CStr(lvl.Number) & ",""name"":" & JsonStr(lvl.Name) & "}"
     Next lvl
     LevelsJson = r
 End Function
 
-Public Sub XuatPhanTuJSON()
+' Xuat mot tep DGN (da mo) ra JSON; tra ve so phan tu da xuat
+Private Function XuatMotTep(df As DesignFile) As Long
     Dim ee As ElementEnumerator, j As String, fn As String, i As Long, st As String
     Dim stm As Object, t0 As Single
     t0 = Timer
     nOut = 0: nSkip = 0
     For i = 0 To 127: nTypes(i) = 0: Next i
-    fn = ActiveDesignFile.FullName & ".cvp.json"
+    fn = df.FullName & ".cvp.json"
 
     Set stm = CreateObject("ADODB.Stream")
     stm.Type = 2: stm.Charset = "us-ascii": stm.Open
-    stm.WriteText "{""schema"":""cvp.dgn_exchange/1"",""source"":{""path"":" & JsonStr(ActiveDesignFile.FullName) & _
+    stm.WriteText "{""schema"":""cvp.dgn_exchange/1"",""source"":{""path"":" & JsonStr(df.FullName) & _
           ",""dgn_version"":""V8"",""reader"":""microstation_vba"",""is_synthetic"":false}," & _
-          """sheet"":{""sheet_id"":" & JsonStr(ActiveDesignFile.Name) & "},""units"":{""master"":""m""}," & _
-          """levels"":[" & LevelsJson() & "]," & """elements"":[" & vbLf
+          """sheet"":{""sheet_id"":" & JsonStr(df.Name) & "},""units"":{""master"":""m""}," & _
+          """levels"":[" & LevelsJson(df) & "]," & """elements"":[" & vbLf
 
-    ShowStatus "CVP: dang xuat phan tu..."
-    Set ee = ActiveModelReference.Scan
+    ShowStatus "CVP: dang xuat " & df.Name & "..."
+    Set ee = df.DefaultModelReference.Scan
     Do While ee.MoveNext
         j = ElemJson(ee.Current)
         If j <> "" Then
             If nOut > 0 Then stm.WriteText "," & vbLf
             stm.WriteText j
             nOut = nOut + 1
-            If nOut Mod 2000 = 0 Then ShowStatus "CVP: da xuat " & nOut & " phan tu..."
+            If nOut Mod 2000 = 0 Then ShowStatus "CVP: " & df.Name & " da xuat " & nOut & " phan tu..."
         End If
     Loop
 
@@ -154,5 +155,61 @@ Public Sub XuatPhanTuJSON()
                   ",""element_types"":{" & st & "},""seconds"":" & Num(Timer - t0) & "}}"
     stm.SaveToFile fn, 2
     stm.Close
-    ShowMessage "CVP: da xuat " & nOut & " phan tu (bo qua " & nSkip & " phan tu cung/ellipse/khac) -> " & fn
+    XuatMotTep = nOut
+End Function
+
+' Xuat tep DGN dang mo
+Public Sub XuatPhanTuJSON()
+    Dim n As Long
+    n = XuatMotTep(ActiveDesignFile)
+    ShowMessage "CVP: da xuat " & n & " phan tu (bo qua " & nSkip & " phan tu cung/ellipse/khac) -> " & _
+                ActiveDesignFile.FullName & ".cvp.json"
+End Sub
+
+' Xuat TAT CA tep .dgn trong mot thu muc (mo CHI DOC, khong hien len man hinh, khong sua tep)
+Public Sub XuatThuMucJSON()
+    Dim folder As String, f As String, files() As String, nF As Long, k As Long
+    Dim df As DesignFile, n As Long, rep As String, okN As Long, errN As Long, msg As String
+    folder = InputBox("Thu muc chua cac tep DGN can xuat:", "CVP - xuat ca thu muc", ActiveDesignFile.Path)
+    If folder = "" Then Exit Sub
+    If Right$(folder, 1) <> "\" Then folder = folder & "\"
+    f = Dir$(folder & "*.dgn")
+    Do While f <> ""
+        ReDim Preserve files(0 To nF)
+        files(nF) = f: nF = nF + 1
+        f = Dir$()
+    Loop
+    If nF = 0 Then
+        ShowMessage "CVP: khong co tep .dgn trong " & folder
+        Exit Sub
+    End If
+    rep = ""
+    For k = 0 To nF - 1
+        On Error GoTo LoiTep
+        If LCase$(folder & files(k)) = LCase$(ActiveDesignFile.FullName) Then
+            n = XuatMotTep(ActiveDesignFile)
+        Else
+            Set df = OpenDesignFileForProgram(folder & files(k), True)
+            n = XuatMotTep(df)
+            df.Close
+            Set df = Nothing
+        End If
+        rep = rep & files(k) & ": " & n & " phan tu, bo qua " & nSkip & vbLf
+        okN = okN + 1
+        GoTo TiepTheo
+LoiTep:
+        msg = Err.Description
+        Resume DonDep
+DonDep:
+        On Error Resume Next
+        If Not df Is Nothing Then df.Close
+        Set df = Nothing
+        On Error GoTo 0
+        rep = rep & files(k) & ": LOI " & msg & vbLf
+        errN = errN + 1
+TiepTheo:
+        On Error GoTo 0
+    Next k
+    ShowMessage "CVP: xong " & okN & " tep, loi " & errN & " tep"
+    MsgBox "CVP - ket qua xuat thu muc " & folder & vbLf & vbLf & rep, vbInformation, "CVP"
 End Sub

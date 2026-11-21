@@ -34,6 +34,12 @@ vba run [CVP]XuatPhanTu_CVP.XuatPhanTuJSON
 Thanh trạng thái MicroStation hiện "CVP: dang xuat phan tu…". Khi xong có hộp thoại:
 `CVP: da xuat N phan tu (bo qua M ...) -> D:\CVP\test\DC8.dgn.cvp.json` — **ghi lại N và M**.
 
+## 5b. Xuất CẢ THƯ MỤC một lần (nhiều tờ)
+1. Mở một tệp DGN bất kỳ trong thư mục (ví dụ DC1.dgn) — macro cần MicroStation đang mở một tệp.
+2. Key-in: `vba run [CVP]XuatPhanTu_CVP.XuatThuMucJSON` (hoặc trong VBA Editor đặt con trỏ trong `Sub XuatThuMucJSON` rồi F5).
+3. Hộp thoại hỏi thư mục → mặc định là thư mục của tệp đang mở → OK.
+4. Macro mở lần lượt từng `.dgn` ở chế độ CHỈ ĐỌC (không hiện lên màn hình), ghi `<tên>.dgn.cvp.json` cạnh từng tệp, cuối cùng hiện bảng kết quả: số phần tử từng tệp, tệp nào lỗi.
+
 ## 6. Kiểm tra kết quả
 - Thư mục chứa DGN có thêm `DC8.dgn.cvp.json`.
 - Mở bằng Notepad: dòng đầu bắt đầu bằng `{"schema":"cvp.dgn_exchange/1"`; cuối tệp có `"stats":{"exported":...,"element_types":{...}}`.
