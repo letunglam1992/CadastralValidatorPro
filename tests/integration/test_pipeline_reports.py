@@ -88,3 +88,20 @@ def test_real_dgn_probe_is_v8_and_reader_blocked_without_com(tmp_path):
     results, _ = run_check(CheckOptions(inputs=files[:1], out_dir=tmp_path, html=False))
     assert results[0].status == "KHONG_DOC_DUOC"
     assert "Windows" in results[0].message or "pywin32" in results[0].message or "ProgID" in results[0].message
+
+
+def test_sheet_profile_scale_and_height(tmp_path):
+    """Hồ sơ tờ (level profile) cấp tỷ lệ, mặt so sánh diện tích, độ cao khi CLI không truyền."""
+    import json as _j
+    prof = tmp_path / "p.json"
+    _j.dump({"profile_id": "T", "boundary_levels": [10], "frame_levels": [54],
+             "label_levels": {"parcel_no": [13], "area": [4], "land_type": [2]},
+             "scale": "1:5000", "area_reference": "ground", "mean_height_m": 904}, open(prof, "w"))
+    save_exchange(sheet(grid_elements(), "DCX"), tmp_path / "DCX.json")
+    res, info = run_check(CheckOptions(inputs=[tmp_path / "DCX.json"], out_dir=tmp_path / "o", html=False,
+                                       levels_path=prof, scale_from_cli=False,
+                                       crs_profile_id="VN2000_TM3_104", crs_confirmed=True))
+    st = res[0].stats
+    assert st["scale"] == "1:5000" and st["area_reference"] == "ground" and st["mean_height_m"] == 904
+    assert info["meta"]["scale"] == "1:5000"
+    assert res[0].status == "OK"   # 400 m² lưới -> mặt đất lệch << hạn sai 1:5000

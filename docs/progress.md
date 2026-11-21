@@ -44,3 +44,9 @@
 - Thêm `domain/area_tolerance.py` (Phụ lục 04, 6 tỷ lệ), `domain/area_reference.py` (grid/ellipsoid/ground), tùy chọn `--area-ref`, `--mean-height`; Excel thêm cột "Mã loại đất mới (người dùng nhập)".
 - Sửa lỗi: vùng có 2 nhãn diện tích từng bị so diện tích với nhãn đầu tiên (DC8 thửa 9, 26) → nay chỉ báo TRUNG_NHAN.
 - DC8 (mặt đất, chưa có h): 1 lỗi diện tích — thửa 45 lệch 44,16 m² > hạn sai 8,57 m². Sai khác hệ thống ~0,02% của các thửa khác nằm trong hạn sai. 66 test PASS.
+
+## Lượt 6 — 21/11/2026: TT 23/2025 và hồ sơ tờ DC8
+- Người dùng: mốc 50 m² (1:5000/1:10000); đồng ý vận dụng khoản 5 Điều 8; h = 904 m; cung cấp TT 23/2025.
+- TT 23/2025 không sửa khoản 5 Điều 8 / Phụ lục 04 TT 26/2024; Phụ lục 01 (đã sửa) xác nhận KTT Sơn La 104°00' → CRS VERIFIED_CURRENT.
+- Hồ sơ Level DC8 mang thêm thuộc tính tờ: scale 1:5000, area_reference ground, mean_height_m 904 → CLI/GUI không cần nhập lại.
+- DC8: 1 lỗi diện tích (thửa 45, lệch 44,61 m² > 8,58 m²).

@@ -39,5 +39,10 @@
     "NHANTHUA"
   ],
   "error_overlay_level": 63,
-  "exclusion_boxes": []
+  "exclusion_boxes": [],
+  "scale": "1:5000",
+  "scale_source": "Người dùng xác nhận 21/11/2026",
+  "area_reference": "ground",
+  "mean_height_m": 904.0,
+  "mean_height_source": "Trung vị 43 nhãn độ cao Level DO-CAO trong DC8 (861–969 m); người dùng chấp thuận 21/11/2026"
 }

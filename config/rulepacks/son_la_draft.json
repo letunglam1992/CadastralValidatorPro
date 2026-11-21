@@ -1,6 +1,6 @@
 {
  "rule_pack_id": "son_la_draft",
- "rule_pack_version": "draft-2",
+ "rule_pack_version": "draft-3",
  "approval_status": "DRAFT",
  "jurisdiction": "Sơn La",
  "profile_label": "Bộ quy tắc kiểm tra offline cấu hình (KHÔNG phải chứng nhận LANDINFO)",
@@ -303,12 +303,13 @@
      "article": "Điều 8",
      "clause": "khoản 5",
      "appendix": "Phụ lục số 04",
-     "note": "Văn bản quy định so với diện tích đo trực tiếp tại thực địa; vận dụng cho so sánh nhãn–hình học theo quyết định người dùng 21/11/2026. Chưa đối chiếu sửa đổi TT 23/2025."
+     "note": "Văn bản quy định so với diện tích đo trực tiếp tại thực địa; vận dụng cho so sánh nhãn–hình học theo quyết định người dùng 21/11/2026. Đã đối chiếu TT 23/2025/TT-BNNMT (Điều 8, khoản 8 Điều 10): KHÔNG sửa khoản 5 Điều 8 và Phụ lục 04 TT 26/2024. Chưa rà văn bản ban hành sau 20/6/2025. Mốc 50 m² cho dòng '50 < S ≤ 300' tỷ lệ 1:5.000/1:10.000 (văn bản ghi 40 m²) do người dùng quyết định."
     }
    ],
    "auto_fix_policy": "NONE",
    "test_case_id": "test_area_delta",
-   "enabled": true
+   "enabled": true,
+   "verified_at": "2026-11-21"
   },
   {
    "rule_id": "AREA-002",

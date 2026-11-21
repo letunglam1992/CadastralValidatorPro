@@ -41,6 +41,10 @@ class LevelProfile:
     name_to_number_fallback: dict = field(default_factory=dict)
     exclusion_boxes: list = field(default_factory=list)   # [[x0,y0,x1,y1], ...] vùng bỏ qua nhãn (bảng, chú dẫn)
     verification_status: str = "PENDING_VERIFICATION"
+    # Thuộc tính theo tờ/dự án (tùy chọn): mặt so sánh diện tích, độ cao trung bình, tỷ lệ
+    area_reference: Optional[str] = None
+    mean_height_m: Optional[float] = None
+    scale: Optional[str] = None
 
 
 @dataclass
@@ -91,6 +95,9 @@ def load_levels(path: Path | None = None) -> LevelProfile:
                                      if not str(k).startswith("_")},
             exclusion_boxes=[list(map(float, b)) for b in d.get("exclusion_boxes", [])],
             verification_status=d.get("verification_status", "PENDING_VERIFICATION"),
+            area_reference=d.get("area_reference"),
+            mean_height_m=float(d["mean_height_m"]) if d.get("mean_height_m") is not None else None,
+            scale=d.get("scale"),
         )
     except KeyError as e:
         raise ConfigError(f"{path.name}: thiếu trường {e}") from e

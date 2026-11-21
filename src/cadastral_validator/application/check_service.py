@@ -31,8 +31,9 @@ class CheckOptions:
     dbf_encoding: Optional[str] = None
     gml_swap_xy: bool = False
     levels_path: Optional[Path] = None
-    area_reference: str = "grid"
+    area_reference: Optional[str] = None   # None -> lấy theo hồ sơ Level/tờ, mặc định "grid"
     mean_height_m: Optional[float] = None
+    scale_from_cli: bool = True
 
 
 def expand_inputs(paths: list[Path]) -> list[Path]:
@@ -77,7 +78,11 @@ def run_check(o: CheckOptions, progress: Optional[Callable[[int, int, str], None
             progress(k, len(files), p.name)
         try:
             sheet, _rep = load_sheet(p, o)
-            sheet.area_reference, sheet.mean_height_m = o.area_reference, o.mean_height_m
+            lv = cfg.levels
+            sheet.area_reference = o.area_reference or lv.area_reference or "grid"
+            sheet.mean_height_m = o.mean_height_m if o.mean_height_m is not None else lv.mean_height_m
+            if not o.scale_from_cli and lv.scale:
+                sheet.scale = lv.scale
             res = validator.validate(sheet)
         except Exception as e:  # một tệp hỏng không làm dừng cả lô
             res = SheetResult(sheet_id=p.stem, file_name=p.name, status="KHONG_DOC_DUOC", message=str(e))
@@ -94,9 +99,11 @@ def run_check(o: CheckOptions, progress: Optional[Callable[[int, int, str], None
                                                                          "stats": res.stats}})
     meta = {"rule_pack": f"{pack.rule_pack_id}@{pack.version}", "rule_pack_approval": pack.approval_status,
             "config_hash": pack.config_hash[:16], "level_profile": cfg.levels.profile_id,
-            "run_at": datetime.now().isoformat(timespec="seconds"), "scale": o.scale,
+            "run_at": datetime.now().isoformat(timespec="seconds"),
+            "scale": o.scale if (o.scale_from_cli or not cfg.levels.scale) else cfg.levels.scale,
             "crs_profile": o.crs_profile_id, "crs_confirmed": o.crs_confirmed,
-            "area_reference": o.area_reference, "mean_height_m": o.mean_height_m,
+            "area_reference": o.area_reference or cfg.levels.area_reference or "grid",
+            "mean_height_m": o.mean_height_m if o.mean_height_m is not None else cfg.levels.mean_height_m,
             "app_version": "0.1.0-g1"}
     paths = write_all(results, o.out_dir, meta, html=o.html)
     return results, {"meta": meta, "paths": {k: str(v) for k, v in paths.items()}}

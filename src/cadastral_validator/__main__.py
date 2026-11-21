@@ -23,14 +23,14 @@ def main(argv=None) -> int:
     c.add_argument("inputs", nargs="+", type=Path)
     c.add_argument("-o", "--out", type=Path, default=ROOT / "output")
     c.add_argument("--rulepack", type=Path, default=ROOT / "config" / "rulepacks" / "son_la_draft.json")
-    c.add_argument("--scale", default="1:1000")
+    c.add_argument("--scale", default=None, help="Mặc định lấy theo hồ sơ Level/tờ, nếu không có thì 1:1000")
     c.add_argument("--crs-profile")
     c.add_argument("--confirm-crs", action="store_true", help="Người dùng xác nhận CRS profile cho các tờ")
     c.add_argument("--no-html", action="store_true")
     c.add_argument("--field", action="append", default=[], help="Ánh xạ trường SHP/GML, vd parcel_no=SoThua")
     c.add_argument("--dbf-encoding")
     c.add_argument("--gml-swap-xy", action="store_true")
-    c.add_argument("--area-ref", choices=["grid", "ellipsoid", "ground"], default="grid",
+    c.add_argument("--area-ref", choices=["grid", "ellipsoid", "ground"], default=None,
                    help="Mặt tính diện tích ghi trên nhãn: mặt phẳng chiếu / ellipsoid / mặt đất thực")
     c.add_argument("--mean-height", type=float, help="Độ cao trung bình khu đo (m) khi --area-ref ground")
     c.add_argument("--levels", type=Path, help="Hồ sơ Level (vd config/level_profiles/dc8_phieng_luong.json)")
@@ -65,7 +65,8 @@ def main(argv=None) -> int:
     fm = dict(kv.split("=", 1) for kv in a.field)
     if a.confirm_crs and not a.crs_profile:
         ap.error("--confirm-crs cần --crs-profile")
-    o = CheckOptions(inputs=a.inputs, out_dir=a.out, rulepack=a.rulepack, scale=a.scale,
+    o = CheckOptions(inputs=a.inputs, out_dir=a.out, rulepack=a.rulepack, scale=a.scale or "1:1000",
+                     scale_from_cli=a.scale is not None,
                      crs_profile_id=a.crs_profile, crs_confirmed=a.confirm_crs, html=not a.no_html,
                      field_map=fm, dbf_encoding=a.dbf_encoding, gml_swap_xy=a.gml_swap_xy,
                      levels_path=a.levels, area_reference=a.area_ref, mean_height_m=a.mean_height)

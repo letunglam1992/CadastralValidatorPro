@@ -8,7 +8,7 @@
 | LUAT_DDBD | Luật Đo đạc và bản đồ 27/2018/QH14 | 14/06/2018 | CẦN BỔ SUNG | tất cả | Phải rà soát sửa đổi | PENDING_VERIFICATION | — |
 | ND101_2024 | NĐ 101/2024/NĐ-CP (hồ sơ địa chính, CSDL) | 29/07/2024 | CẦN BỔ SUNG | 3,6 | Có sửa đổi bởi NĐ 226/2025 | PENDING_VERIFICATION | — |
 | ND226_2025 | NĐ 226/2025/NĐ-CP | 15/08/2025 | CẦN BỔ SUNG | 2,5,6 | Đã xác minh khái quát | PENDING_VERIFICATION | vanban.chinhphu.vn docid=214955 |
-| TT26_2024 | TT 26/2024/TT-BTNMT kỹ thuật đo đạc lập BĐĐC (hiệu lực 15/01/2025), sửa đổi bởi TT 23/2025/TT-BNNMT; VBHN 34/VBHN-BNNMT | 26/11/2024 | **Điều 8 khoản 5 + Phụ lục số 04** (giới hạn sai diện tích) — đã đọc từ bản .docx người dùng cung cấp 21/11/2026; các điều/phụ lục khác CẦN BỔ SUNG | 1–6 (nguồn cốt lõi) | Có sửa đổi bởi TT 23/2025 | AREA-001: VERIFIED_PARTIAL (chưa đối chiếu sửa đổi TT 23/2025 với Phụ lục 04); còn lại PENDING | bản .docx người dùng; vanban.chinhphu.vn docid=212227 |
+| TT26_2024 | TT 26/2024/TT-BTNMT kỹ thuật đo đạc lập BĐĐC (hiệu lực 15/01/2025), sửa đổi bởi TT 23/2025/TT-BNNMT; VBHN 34/VBHN-BNNMT | 26/11/2024 | **Điều 8 khoản 5 + Phụ lục số 04** (giới hạn sai diện tích) — đã đọc từ bản .docx người dùng cung cấp 21/11/2026; các điều/phụ lục khác CẦN BỔ SUNG | 1–6 (nguồn cốt lõi) | Có sửa đổi bởi TT 23/2025 | AREA-001: VERIFIED_PARTIAL — đã đối chiếu TT 23/2025: không sửa khoản 5 Điều 8, Phụ lục 04; chưa rà văn bản sau 20/6/2025; còn lại PENDING | bản .docx người dùng; vanban.chinhphu.vn docid=212227 |
 | TT10_2024 | TT 10/2024/TT-BTNMT hồ sơ địa chính, GCN | 31/07/2024 | mẫu trích lục — CẦN BỔ SUNG | 6 | Đã xác minh nguồn gốc | PENDING_VERIFICATION | vanban.chinhphu.vn docid=210905 |
 | TT25_2024 | TT 25/2024/TT-BTNMT quy trình CSDL đất đai | 26/11/2024 | CẦN BỔ SUNG | 1,3 | Cần kiểm tra văn bản gốc | PENDING_VERIFICATION | vanban.chinhphu.vn docid=212226 |
 | TT24_2018 / TT19_2024 | Kiểm tra, thẩm định, nghiệm thu sản phẩm đo đạc | 15/11/2018; 31/10/2024 | CẦN BỔ SUNG | báo cáo | Rà soát sửa đổi | PENDING_VERIFICATION | — |
@@ -32,3 +32,8 @@
 - Chú thích (*) Phụ lục 04: nội suy đến 01 m² ⇒ diện tích lấy đến 1 m² (làm tròn xuống) trước khi tính.
 - **Điểm không thống nhất trong văn bản:** tỷ lệ 1:5.000 và 1:10.000, dòng "50 < S ≤ 300" ghi "so với hạn sai của thửa đất **40 m²**" trong khi dòng trên là "S ≤ **50** … ≤ 0,5 m²". Phần mềm lấy mốc 50 m² — chờ người dùng xác nhận.
 - Diện tích nhãn DC8 theo **mặt đất thực** (người dùng xác nhận). Phần mềm quy đổi: lưới → ellipsoid (chiếu ngược TM, KTT 104°, k0 0,9999) → mặt đất × (1 + h/R)², h = độ cao trung bình do người dùng nhập.
+
+## Đối chiếu TT 23/2025/TT-BNNMT (ngày 20/6/2025, hiệu lực 01/7/2025) — 21/11/2026
+
+Nguồn: bản .docx người dùng cung cấp. **Điều 8** TT 23/2025 sửa đổi TT 26/2024 gồm: khoản 6 Điều 18; bổ sung điểm c khoản 2 Điều 23; khoản 5 Điều 23; bổ sung khoản 3 Điều 27 (sáp nhập ĐVHC: giữ nguyên KTT); **Phụ lục số 01** (kinh tuyến trục — Sơn La 104°00'); bổ sung điểm 5 mục III Phụ lục số 22. **Khoản 8 Điều 10** thay thế/bãi bỏ cụm từ tại TT 26/2024 (khoản 1 Điều 3, Điều 5, 9, 13, 25, 29; Phụ lục 12b, 18, 21, 22…).
+⇒ **Không** sửa khoản 5 Điều 8 và Phụ lục số 04 TT 26/2024. CRS `VN2000_TM3_104` nâng lên VERIFIED_CURRENT theo Phụ lục 01 (đã sửa).

@@ -22,13 +22,24 @@
         ]
       },
       "source": "Bo quy tac.json (người dùng cung cấp)",
-      "verification_status": "VERIFIED_PARTIAL",
+      "verification_status": "VERIFIED_CURRENT",
       "confirmed_by_user": true,
       "confirmation": {
         "date": "2026-11-21",
         "by": "người dùng",
         "evidence": "Ảnh bảng kinh tuyến trục theo tỉnh: dòng 3 'Sơn La — 104°00′' (chưa ghi số hiệu văn bản nguồn)"
-      }
+      },
+      "legal_refs": [
+        {
+          "document_id": "TT26_2024",
+          "appendix": "Phụ lục số 01 (Kinh tuyến trục theo tỉnh, thành phố)",
+          "amended_by": "TT 23/2025/TT-BNNMT, khoản 5 Điều 8",
+          "row": "STT 3 — Sơn La — 104°00'",
+          "verified_at": "2026-11-21",
+          "source": "bản .docx TT 23/2025 người dùng cung cấp"
+        }
+      ],
+      "verification_note": "Đối chiếu Phụ lục 01 TT 26/2024 đã sửa bởi khoản 5 Điều 8 TT 23/2025 (hiệu lực 01/7/2025). Chưa rà văn bản ban hành sau 20/6/2025."
     },
     {
       "id": "VN2000_TM3_108_30",
