@@ -7,8 +7,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-ROOT = Path(__file__).resolve().parents[3]
+import sys
+
+FROZEN = bool(getattr(sys, "frozen", False))
+if FROZEN:
+    # Bản đóng gói PyInstaller: tài nguyên chỉ đọc nằm trong _MEIPASS; dữ liệu ghi ra thư mục người dùng
+    ROOT = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+    USER_DIR = Path.home() / "Documents" / "CadastralValidatorPro"
+else:
+    ROOT = Path(__file__).resolve().parents[3]
+    USER_DIR = ROOT
 CONFIG_DIR = ROOT / "config"
+OUTPUT_DIR = USER_DIR / "output"
+LOG_DIR = USER_DIR / "logs"
 
 
 class ConfigError(ValueError):

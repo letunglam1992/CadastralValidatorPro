@@ -104,6 +104,6 @@ def run_check(o: CheckOptions, progress: Optional[Callable[[int, int, str], None
             "crs_profile": o.crs_profile_id, "crs_confirmed": o.crs_confirmed,
             "area_reference": o.area_reference or cfg.levels.area_reference or "grid",
             "mean_height_m": o.mean_height_m if o.mean_height_m is not None else cfg.levels.mean_height_m,
-            "app_version": "0.1.0-g1"}
+            "app_version": "0.2.0"}
     paths = write_all(results, o.out_dir, meta, html=o.html)
     return results, {"meta": meta, "paths": {k: str(v) for k, v in paths.items()}}

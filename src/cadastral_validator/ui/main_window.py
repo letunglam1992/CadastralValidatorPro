@@ -15,7 +15,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComb
 
 from ..adapters.microstation_com import com_capability
 from ..application.check_service import CheckOptions, run_check
-from ..infrastructure.config import CONFIG_DIR, ROOT, load_crs_profiles
+from ..infrastructure.config import CONFIG_DIR, LOG_DIR, OUTPUT_DIR, load_crs_profiles
+from ..infrastructure.logging_setup import setup_logging
 
 STYLE = """
 QWidget{font-family:'Segoe UI',Arial;font-size:10pt}
@@ -101,7 +102,7 @@ class CheckTab(QWidget):
         b1 = QPushButton("Thư mục…"); b1.clicked.connect(self.pick_dir)
         b2 = QPushButton("Tệp…"); b2.clicked.connect(self.pick_files)
         gl.addWidget(QLabel("Nguồn"), 0, 0); gl.addWidget(self.inp, 0, 1); gl.addWidget(b1, 0, 2); gl.addWidget(b2, 0, 3)
-        self.out = QLineEdit(str(ROOT / "output"))
+        self.out = QLineEdit(str(OUTPUT_DIR))
         b3 = QPushButton("Chọn…"); b3.clicked.connect(self.pick_out)
         gl.addWidget(QLabel("Thư mục báo cáo"), 1, 0); gl.addWidget(self.out, 1, 1); gl.addWidget(b3, 1, 2)
         self.scale = QComboBox(); self.scale.addItems(["1:500", "1:1000", "1:2000", "1:5000", "1:10000"])
@@ -300,13 +301,14 @@ class CheckTab(QWidget):
             self.open_path(f"html:{r.sheet_id}")
 
     def open_dir(self):
+        Path(self.out.text()).mkdir(parents=True, exist_ok=True)
         QDesktopServices.openUrl(QUrl.fromLocalFile(self.out.text()))
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CadastralValidatorPro 0.1 (G1) — Kiểm tra dữ liệu bản đồ địa chính")
+        self.setWindowTitle("CadastralValidatorPro 0.2 — Kiểm tra dữ liệu bản đồ địa chính")
         self.resize(1280, 800)
         w = QWidget(); lay = QHBoxLayout(w); lay.setContentsMargins(0, 0, 0, 0); lay.setSpacing(0)
         left = QFrame(); left.setFixedWidth(270); ll = QVBoxLayout(left); ll.setContentsMargins(0, 0, 0, 0)
@@ -325,6 +327,10 @@ class MainWindow(QMainWindow):
 
 
 def run_gui() -> int:
+    try:
+        setup_logging(LOG_DIR)
+    except OSError:
+        pass
     app = QApplication.instance() or QApplication(sys.argv)
     app.setStyleSheet(STYLE)
     win = MainWindow()

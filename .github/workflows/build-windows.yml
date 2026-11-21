@@ -1,0 +1,69 @@
+name: Build Windows installer
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cài thư viện
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock pyinstaller pywin32
+
+      - name: Chạy test (Windows, Python 3.11)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest -q
+
+      - name: Đóng gói PyInstaller
+        run: pyinstaller --noconfirm installer/CadastralValidatorPro.spec
+
+      - name: Kiểm tra EXE khởi động (CLI probe qua mã nguồn đóng gói)
+        shell: pwsh
+        run: |
+          if (!(Test-Path dist/CadastralValidatorPro/CadastralValidatorPro.exe)) { throw "Không có EXE" }
+          if (!(Test-Path dist/CadastralValidatorPro/_internal/config/rulepacks/son_la_draft.json)) { throw "Thiếu config" }
+          $p = Start-Process dist/CadastralValidatorPro/CadastralValidatorPro.exe -PassThru
+          Start-Sleep -Seconds 15
+          if ($p.HasExited) { throw "EXE thoát sớm, mã $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+          Write-Host "EXE chạy được 15 giây không lỗi"
+
+      - name: Cài Inno Setup (nếu thiếu)
+        shell: pwsh
+        run: |
+          if (!(Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+
+      - name: Tạo bộ cài
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\CadastralValidatorPro.iss
+          Get-ChildItem dist_installer
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CadastralValidatorPro_Setup
+          path: dist_installer/*.exe
+
+      - name: Phát hành (khi đẩy tag v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist_installer/*.exe
+          body: |
+            Bộ cài Windows 10/11 x64 (không cần quyền quản trị). Build tự động bằng GitHub Actions.
+            Chưa ký số (Windows SmartScreen có thể cảnh báo: chọn "More info" → "Run anyway").
+            Kết quả kiểm tra theo bộ quy tắc cấu hình — không phải chứng nhận LANDINFO/cơ quan nhà nước.

@@ -12,7 +12,7 @@ import json
 import sys
 from pathlib import Path
 
-from .infrastructure.config import ROOT
+from .infrastructure.config import CONFIG_DIR, LOG_DIR, OUTPUT_DIR
 from .infrastructure.logging_setup import setup_logging
 
 
@@ -21,8 +21,8 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("check", help="Kiểm tra theo bộ quy tắc")
     c.add_argument("inputs", nargs="+", type=Path)
-    c.add_argument("-o", "--out", type=Path, default=ROOT / "output")
-    c.add_argument("--rulepack", type=Path, default=ROOT / "config" / "rulepacks" / "son_la_draft.json")
+    c.add_argument("-o", "--out", type=Path, default=OUTPUT_DIR)
+    c.add_argument("--rulepack", type=Path, default=CONFIG_DIR / "rulepacks" / "son_la_draft.json")
     c.add_argument("--scale", default=None, help="Mặc định lấy theo hồ sơ Level/tờ, nếu không có thì 1:1000")
     c.add_argument("--crs-profile")
     c.add_argument("--confirm-crs", action="store_true", help="Người dùng xác nhận CRS profile cho các tờ")
@@ -60,7 +60,7 @@ def main(argv=None) -> int:
         from .ui.main_window import run_gui
         return run_gui()
 
-    setup_logging(ROOT / "logs")
+    setup_logging(LOG_DIR)
     from .application.check_service import CheckOptions, run_check
     fm = dict(kv.split("=", 1) for kv in a.field)
     if a.confirm_crs and not a.crs_profile:

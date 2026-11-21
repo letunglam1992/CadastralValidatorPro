@@ -19,5 +19,6 @@ __pycache__/
 .venv/
 build/
 dist/
-*.spec
+
 *.tmp
+dist_installer/
