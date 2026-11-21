@@ -68,3 +68,9 @@
 - Đồng ý độ cao tự động theo DO-CAO; DC2 chỉ có ranh ở L, THUA; kết quả sai diện tích được xác nhận.
 - Không có cung tròn (type 16) bị bỏ sót; phần bị bỏ: ellipse/đường tròn (15), dimension (33), phần tử không đồ họa.
 - Đầu mút treo nay ghi khoảng hở tới nét gần nhất (hụt/thừa < 1 m; hở 1–5 m; ranh hở/đứt > 5 m). DC2: 33 điểm < 1 m, 205 điểm 1–5 m, 258 điểm > 5 m.
+
+## Lượt 10 — 21/11/2026: Tab 2 (G3) — sửa đầu mút treo có kiểm soát
+- `domain/fixes.py`: JOIN/TRIM/EXTEND/SNAP, bỏ qua nét rời ngắn treo 2 đầu (DC2: 8 nét ~0,7 m nghi ký hiệu); `application/fix_service.py`: analyze, evaluate_each, simulate, export (bản sao DGN kiểm hash, macro áp dụng/hoàn tác có chốt "_BANSAO" và kiểm tọa độ trước); `ui/fix_tab.py`.
+- Lỗi phát hiện khi chạy dữ liệu thật và đã sửa: hai đầu treo đối diện bị đề xuất đổi chỗ cho nhau (DC2 28 đề xuất chỉ giảm 14 treo) → thêm JOIN.
+- Dữ liệu thật, ngưỡng 1 m, chọn "không lỗi mới, trừ SNAP": DC2 7 sửa (treo 496→484, lỗi 1493→1475), DC10 8 sửa (217→204, 1032→1016), DC9 1, DC1/DC8 0. Phần lớn đầu treo > 1 m — không thuộc phạm vi tự sửa.
+- G3: PARTIAL — macro áp dụng NOT_TESTED; chưa có sửa chồng/hở, mã đất, số thửa.

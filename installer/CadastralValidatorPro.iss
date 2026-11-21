@@ -2,7 +2,7 @@
 ; Cài theo người dùng (không cần quyền quản trị) vào %LOCALAPPDATA%\Programs\CadastralValidatorPro
 #define AppName "CadastralValidatorPro"
 #ifndef AppVersion
-  #define AppVersion "0.2.5"
+  #define AppVersion "0.3.0"
 #endif
 
 [Setup]
@@ -39,6 +39,7 @@ Source: "..\dist\CadastralValidatorPro\*"; DestDir: "{app}"; Flags: ignoreversio
 Name: "{group}\CadastralValidatorPro"; Filename: "{app}\CadastralValidatorPro.exe"
 Name: "{group}\Macro VBA xuat DGN (thu muc)"; Filename: "{app}\_internal\scripts\microstation"
 Name: "{group}\Huong dan xuat DGN"; Filename: "{app}\_internal\docs\huong_dan_xuat_DGN_bang_macro.md"
+Name: "{group}\Huong dan Tab 2 (sua dau mut treo)"; Filename: "{app}\_internal\docs\huong_dan_tab2_sua_dau_mut_treo.md"
 Name: "{group}\Go cai dat CadastralValidatorPro"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\CadastralValidatorPro"; Filename: "{app}\CadastralValidatorPro.exe"; Tasks: desktopicon
 

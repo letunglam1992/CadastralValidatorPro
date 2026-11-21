@@ -8,6 +8,7 @@ datas = [
     (str(ROOT / "config"), "config"),
     (str(ROOT / "scripts" / "microstation"), "scripts/microstation"),
     (str(ROOT / "docs" / "huong_dan_xuat_DGN_bang_macro.md"), "docs"),
+    (str(ROOT / "docs" / "huong_dan_tab2_sua_dau_mut_treo.md"), "docs"),
 ]
 
 hidden = ["shapely", "pyproj", "openpyxl", "lxml.etree", "olefile", "shapefile"]

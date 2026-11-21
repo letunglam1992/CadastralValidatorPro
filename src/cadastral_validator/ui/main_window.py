@@ -31,7 +31,7 @@ QPushButton#primary:disabled{background:#93c5fd}
 
 TABS = [
     ("1  Chuyển GML/SHP → DGN", "G2", "Chưa triển khai: cần writer DGN V8 đã xác minh (MicroStation COM) và seed/Level được duyệt."),
-    ("2  Xử lý chồng/hở", "G3", "Chưa triển khai: sửa có kiểm soát cần ChangeSet, phê duyệt và rollback."),
+    ("2  Xử lý đầu mút treo", "G3", ""),
     ("3  Kiểm tra DGN", "G1", ""),
     ("4  Vẽ khung bản đồ", "G4", "Chưa triển khai: cần template khung đã đối chiếu TT 26/2024 (đã sửa đổi)."),
     ("5  So sánh bản đồ", "G5", "Chưa triển khai."),
@@ -321,7 +321,7 @@ class CheckTab(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CadastralValidatorPro 0.2.5 — Kiểm tra dữ liệu bản đồ địa chính")
+        self.setWindowTitle("CadastralValidatorPro 0.3.0 — Kiểm tra dữ liệu bản đồ địa chính")
         self.resize(1280, 800)
         w = QWidget(); lay = QHBoxLayout(w); lay.setContentsMargins(0, 0, 0, 0); lay.setSpacing(0)
         left = QFrame(); left.setFixedWidth(270); ll = QVBoxLayout(left); ll.setContentsMargins(0, 0, 0, 0)
@@ -329,9 +329,15 @@ class MainWindow(QMainWindow):
         self.side = QListWidget(); self.side.setObjectName("side"); self.side.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff); ll.addWidget(self.side)
         self.stack = QStackedWidget()
         for title, gate, note in TABS:
-            item = QListWidgetItem(title if gate == "G1" else f"{title}  ·  chưa có")
-            self.side.addItem(item)
-            self.stack.addWidget(CheckTab() if gate == "G1" else PlaceholderTab(title, gate, note))
+            ready = gate == "G1" or title.startswith("2 ")
+            self.side.addItem(QListWidgetItem(title if ready else f"{title}  ·  chưa có"))
+            if gate == "G1":
+                self.stack.addWidget(CheckTab())
+            elif title.startswith("2 "):
+                from .fix_tab import FixTab
+                self.stack.addWidget(FixTab())
+            else:
+                self.stack.addWidget(PlaceholderTab(title, gate, note))
         self.side.currentRowChanged.connect(self.stack.setCurrentIndex)
         self.side.setCurrentRow(2)
         lay.addWidget(left); lay.addWidget(self.stack, 1)

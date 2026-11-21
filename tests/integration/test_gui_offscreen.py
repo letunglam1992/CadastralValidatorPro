@@ -47,3 +47,29 @@ def test_gui_shows_full_read_error(tmp_path):
     win.close()
     win.deleteLater()
     app.processEvents()
+
+
+def test_gui_fix_tab_flow(tmp_path):
+    from PySide6.QtWidgets import QApplication
+    from cadastral_validator.ui.main_window import MainWindow
+    from cadastral_validator.application.fix_service import analyze, evaluate_each
+    import copy
+    from fixtures.builders import X0, Y0, W
+    app = QApplication.instance() or QApplication([])
+    els = copy.deepcopy(grid_elements())
+    for e in els:
+        if e.id == "L1":
+            e.coords = [(X0 + W, Y0 + 0.4), e.coords[1]]
+    p = tmp_path / "u.json"
+    save_exchange(sheet(els, "DC_U"), p)
+    win = MainWindow()
+    tab = win.stack.widget(1)
+    assert type(tab).__name__ == "FixTab"
+    s = analyze(p, CheckOptions(inputs=[p], out_dir=tmp_path, crs_profile_id="VN2000_TM3_104", crs_confirmed=True))
+    tab._found(s)
+    assert tab.table.rowCount() == 1
+    tab._evaluated(evaluate_each(s))
+    tab.check(lambda f: f.action != "SNAP")
+    tab.simulate()
+    assert "1 → 0" in tab.status.text()
+    win.close(); win.deleteLater(); app.processEvents()

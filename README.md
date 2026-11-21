@@ -10,7 +10,9 @@ Phần mềm Windows (ưu tiên offline, giao diện tiếng Việt) hỗ trợ 
 |---|---|---|
 | G0 | Khảo sát môi trường, dữ liệu, API, rủi ro | **PARTIAL** — xong phần làm được không cần Windows; MicroStation COM chưa khảo sát trên máy thật |
 | G1 | GUI 6 tab; Tab 3 kiểm tra DGN | **PARTIAL** — lõi kiểm tra + báo cáo + GUI chạy, 49 test PASS trên **dữ liệu tổng hợp**; đọc DGN V8 thật cần MicroStation (NOT TESTED) |
-| G2–G7 | Tab 1, 2, 4, 5, 6; đóng gói EXE | Chưa triển khai |
+| G3 | Tab 2 — sửa đầu mút treo có kiểm soát (ChangeSet, bản sao, hoàn tác) | **PARTIAL** — macro áp dụng chưa thử trên MicroStation |
+| G7 | Bộ cài EXE | Có (GitHub Releases), chưa ký số |
+| G2, G4–G6 | Tab 1, 4, 5, 6 | Chưa triển khai |
 
 **Chưa nghiệm thu tương thích dữ liệu thật.** Lý do: cả 5 tệp DC*.dgn và seed1000.dgn là DGN V8 (OLE + zlib, định dạng phần tử độc quyền) — xem [`docs/gate0/api_probe_report.md`](docs/gate0/api_probe_report.md).
 
