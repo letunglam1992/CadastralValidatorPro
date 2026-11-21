@@ -54,7 +54,7 @@ class LevelProfile:
     verification_status: str = "PENDING_VERIFICATION"
     # Thuộc tính theo tờ/dự án (tùy chọn): mặt so sánh diện tích, độ cao trung bình, tỷ lệ
     area_reference: Optional[str] = None
-    mean_height_m: Optional[float] = None
+    mean_height_m: Optional[float | str] = None   # số mét, hoặc "auto:<tên Level>" (trung vị nhãn độ cao)
     scale: Optional[str] = None
 
 
@@ -107,7 +107,8 @@ def load_levels(path: Path | None = None) -> LevelProfile:
             exclusion_boxes=[list(map(float, b)) for b in d.get("exclusion_boxes", [])],
             verification_status=d.get("verification_status", "PENDING_VERIFICATION"),
             area_reference=d.get("area_reference"),
-            mean_height_m=float(d["mean_height_m"]) if d.get("mean_height_m") is not None else None,
+            mean_height_m=(d["mean_height_m"] if isinstance(d.get("mean_height_m"), str)
+                           else float(d["mean_height_m"]) if d.get("mean_height_m") is not None else None),
             scale=d.get("scale"),
         )
     except KeyError as e:

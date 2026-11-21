@@ -195,39 +195,66 @@ class Validator:
             inside = tree is not None and any(regions[int(j)].intersects(pt) for j in tree.query(pt))
             if not inside:
                 outside.append(i)
-        # Lưới bảng: nhãn cùng hàng (|dY| ≤ 1,5 m) với ≥ 3 nhãn khác VÀ cùng cột (|dX| ≤ 4 m) với ≥ 3 nhãn khác
-        # (chữ căn giữa nên X dao động vài mét — quan sát trên DC8 thật: hàng cách ~29,4 m).
+        # 1) Ứng viên: nhãn ngoài vùng cùng hàng (|dY| ≤ 1,5 m) với ≥ 3 nhãn khác VÀ cùng cột (|dX| ≤ 4 m) với ≥ 3 nhãn khác
         P = [labels[i].anchor for i in outside]
-        table_idx: set[int] = set()
+        cand = []
         for a, i in enumerate(outside):
             xa, ya = P[a]
             row = sum(1 for b, (x, y) in enumerate(P) if b != a and abs(y - ya) <= 1.5)
             col = sum(1 for b, (x, y) in enumerate(P) if b != a and abs(x - xa) <= 4.0)
             if row >= 3 and col >= 3:
-                table_idx.add(i)
+                cand.append(i)
+        if not cand:
+            return labels
+        # 2) Gom cụm liền nhau (khoảng cách ≤ 100 m) — mỗi cụm là một bảng riêng
+        parent = {i: i for i in cand}
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+        for x in range(len(cand)):
+            for y in range(x + 1, len(cand)):
+                (x1, y1), (x2, y2) = labels[cand[x]].anchor, labels[cand[y]].anchor
+                if abs(x1 - x2) <= 100 and abs(y1 - y2) <= 100:
+                    parent[find(cand[x])] = find(cand[y])
+        groups: dict[int, list[int]] = defaultdict(list)
+        for i in cand:
+            groups[find(i)].append(i)
+        # 3) Chỉ nhận cụm có ≥ 3 hàng, ≥ 3 cột, kích thước ≤ 20 cm trên giấy theo tỷ lệ
+        try:
+            denom = float(str(res.stats.get("scale", "1:1000")).split(":")[1])
+        except (IndexError, ValueError):
+            denom = 1000.0
+        max_size = 0.20 * denom
+        table_idx: set[int] = set()
+        boxes = []
+        for idx in groups.values():
+            xs = [labels[i].anchor[0] for i in idx]
+            ys = [labels[i].anchor[1] for i in idx]
+            nrows = len({round(y / 1.5) for y in ys})
+            ncols = len({round(x / 4.0) for x in xs})
+            w, h = max(xs) - min(xs), max(ys) - min(ys)
+            # bảng thống kê có hình gần chữ nhật: loại dải hẹp (nhãn các thửa dạng dải thẳng hàng)
+            if nrows < 3 or ncols < 3 or w > max_size or h > max_size or w < 0.25 * h or h < 0.25 * w:
+                continue
+            rows = sorted({round(y, 0) for y in ys})
+            gaps = sorted(b2 - a2 for a2, b2 in zip(rows, rows[1:]) if b2 - a2 > 1.5)
+            my = 1.2 * gaps[len(gaps) // 2] if gaps else 2.0
+            bx = (min(xs) - 5, min(ys) - my, max(xs) + 5, max(ys) + my)
+            members = {i for i in outside if bx[0] <= labels[i].anchor[0] <= bx[2] and bx[1] <= labels[i].anchor[1] <= bx[3]}
+            table_idx |= members
+            boxes.append((bx, len(members)))
         if not table_idx:
             return labels
-        xs = [labels[i].anchor[0] for i in table_idx]
-        ys = [labels[i].anchor[1] for i in table_idx]
-        bx = (min(xs), min(ys), max(xs), max(ys))
-        # Nới khung bảng thêm 1 hàng (tiêu đề, dòng tổng) và 5 m hai bên
-        rows = sorted({round(y, 0) for y in ys})
-        gaps = sorted(b - a for a, b in zip(rows, rows[1:]) if b - a > 1.5)
-        my = 1.2 * gaps[len(gaps) // 2] if gaps else 2.0
-        for i in outside:
-            x, y = labels[i].anchor
-            if bx[0] - 5 <= x <= bx[2] + 5 and bx[1] - my <= y <= bx[3] + my:
-                table_idx.add(i)
-        xs = [labels[i].anchor[0] for i in table_idx]
-        ys = [labels[i].anchor[1] for i in table_idx]
-        bx = (min(xs), min(ys), max(xs), max(ys))
-        self._issue(res, "NHAN_TRONG_BANG_THONG_KE",
-                    f"{len(table_idx)} nhãn ngoài vùng xếp thành bảng (nghi Bảng thống kê/chú dẫn) trong khung "
-                    f"X {bx[0]:.1f}–{bx[2]:.1f}, Y {bx[1]:.1f}–{bx[3]:.1f}; không tính là lỗi nhãn ngoài vùng. "
-                    f"Nếu đúng, khai báo vào exclusion_boxes của hồ sơ Level.",
-                    ((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2),
-                    element_ids=[labels[i].source_element_id for i in sorted(table_idx)][:50],
-                    evidence={"box": [round(v, 3) for v in bx], "count": len(table_idx)})
+        for bx, n in boxes:
+            self._issue(res, "NHAN_TRONG_BANG_THONG_KE",
+                        f"{n} nhãn ngoài vùng xếp thành bảng (nghi Bảng thống kê/chú dẫn) trong khung "
+                        f"X {bx[0]:.1f}–{bx[2]:.1f}, Y {bx[1]:.1f}–{bx[3]:.1f}; không tính là lỗi nhãn ngoài vùng. "
+                        f"Nếu đúng, khai báo vào exclusion_boxes của hồ sơ Level.",
+                        ((bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2),
+                        evidence={"box": [round(v, 3) for v in bx], "count": n})
         res.stats["nhan_nghi_bang_thong_ke"] = len(table_idx)
         return [lb for i, lb in enumerate(labels) if i not in table_idx]
 

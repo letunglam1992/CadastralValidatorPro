@@ -55,3 +55,11 @@
 - PyInstaller (onedir) + Inno Setup, build trên GitHub Actions windows-latest, Python 3.12 (pyproj 3.8 yêu cầu ≥ 3.12). Workflow: cài thư viện → pytest (66 passed, 1 skipped) → đóng gói → mở EXE 15 giây không lỗi → ISCC → Release.
 - Release v0.2.0: CadastralValidatorPro_Setup_0.2.0.exe (53,6 MB). Chưa ký số. Chưa thử cài trên máy người dùng.
 - Đường dẫn khi chạy EXE: cấu hình trong gói (_MEIPASS), báo cáo/log tại Documents\CadastralValidatorPro.
+
+## Lượt 8 — 21/11/2026: kiểm tra 5 tờ DC1, DC2, DC8, DC9, DC10
+- Macro: OpenDesignFileForProgram gây "Level Error 32768" (không đọc được Level của phần tử tệp mở ngầm) → đổi sang mở lần lượt từng tệp (chỉ đọc). Sửa lỗi ghi '\' (JSON hỏng DC1) do tôi gây ra ở lần sửa trước; loader tự sửa tệp đã xuất lỗi.
+- Chọn thẳng .dgn: dùng <tên>.dgn.cvp.json nếu mới hơn DGN → thử COM → báo hướng dẫn. GUI hiện toàn văn lỗi đọc.
+- DC2, DC10 vẽ ranh ở Level THUA (không phải L) → hồ sơ chung `son_la_ten_level_chung` v2: ranh = L hoặc THUA; tỷ lệ 1:5000; độ cao = auto:DO-CAO (trung vị từng tờ).
+- Heuristic bảng thống kê siết lại (cụm ≤ 100 m, ≥ 3×3, ≤ 20 cm giấy, không phải dải hẹp) — bản cũ gộp nhầm 513 nhãn DC2 thành "bảng". Bảng DC2 (nhiều cột giãn rộng) chỉ nhận một phần → nên khai báo exclusion_boxes.
+- Thêm Level G (đường) vào ranh không cải thiện → không dùng.
+- Kết quả: DC1 296 lỗi, DC2 1.493, DC8 106, DC9 691, DC10 1.032. Sai diện tích: DC2 thửa 487; DC8 thửa 45; DC10 16 thửa.

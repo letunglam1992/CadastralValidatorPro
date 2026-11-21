@@ -1,11 +1,12 @@
 {
-  "profile_id": "SON_LA_TEN_LEVEL_CHUNG_v1",
+  "profile_id": "SON_LA_TEN_LEVEL_CHUNG_v2",
   "classification": "LOCAL_CONFIG",
   "verification_status": "PENDING_VERIFICATION",
-  "note": "Hồ sơ chung theo TÊN Level giống DC8 (L, TCT, DIENTICH3, C, KG-5000) cho các tờ cùng đơn vị lập. Chưa xác nhận cho từng tờ: phần mềm báo 'Không tìm thấy Level theo tên' nếu tờ dùng tên khác. Không gán sẵn tỷ lệ/độ cao — chọn tỷ lệ trên giao diện.",
+  "note": "Hồ sơ chung theo TÊN Level cho các tờ xã Phiêng Luông (DC1, DC2, DC8, DC9, DC10): ranh thửa = L hoặc THUA (DC2, DC10 dùng THUA), số thửa = TCT, diện tích = DIENTICH3, loại đất = C, khung = KG-5000. Tỷ lệ 1:5000 (tên Level KG-5000; người dùng xác nhận cho DC8). Độ cao trung bình: tự động = trung vị nhãn Level DO-CAO của từng tờ (cách người dùng duyệt cho DC8 ngày 21/11/2026).",
   "level_names": {
     "boundary": [
-      "L"
+      "L",
+      "THUA"
     ],
     "parcel_no": [
       "TCT"
@@ -27,5 +28,6 @@
   "error_overlay_level": 63,
   "exclusion_boxes": [],
   "area_reference": "ground",
-  "mean_height_m": null
+  "mean_height_m": "auto:DO-CAO",
+  "scale": "1:5000"
 }

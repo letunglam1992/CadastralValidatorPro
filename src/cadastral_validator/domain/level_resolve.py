@@ -51,7 +51,27 @@ def resolve_levels(lv: LevelProfile, sheet: MapSheet) -> tuple[LevelProfile, dic
             if n in name_to_num:
                 nums |= name_to_num[n]
                 info["resolved"][n] = {"role": role, "numbers": sorted(name_to_num[n]), "source": source[n]}
-            else:
-                info["missing"].append(n)
+        if not nums:   # chỉ báo thiếu khi CẢ vai trò không tìm được tên nào (vd ranh khai báo "L" hoặc "THUA")
+            info["missing"].append(f"{role}: {' / '.join(sorted(names))}")
         setattr(out, _attr(role), nums)
     return out, info
+
+
+def auto_mean_height(sheet: MapSheet, level_names: set[str]) -> tuple[float | None, int]:
+    """Trung vị nhãn độ cao (số) trên các Level có tên trong level_names (vd DO-CAO)."""
+    import statistics
+    vals = []
+
+    def walk(els):
+        for e in els:
+            if e.type == "text" and e.extra.get("level_name") in level_names and e.text:
+                t = e.text.strip().replace(",", ".")
+                try:
+                    v = float(t)
+                    if -500 < v < 9000:
+                        vals.append(v)
+                except ValueError:
+                    pass
+            walk(e.children)
+    walk(sheet.elements)
+    return (statistics.median(vals) if vals else None), len(vals)

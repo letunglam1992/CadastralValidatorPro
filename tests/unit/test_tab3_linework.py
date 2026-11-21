@@ -269,3 +269,30 @@ def test_no_area_compare_when_two_area_labels(validator):
     els.append(RawElement(id="A2", type="text", level=4, text="1423.8", origin=(X0 + 3, Y0 + 3)))
     res = validator.validate(sheet(els))
     assert "TRUNG_NHAN" in codes(res) and "SAI_DIEN_TICH" not in codes(res)
+
+
+def test_scattered_outside_labels_not_treated_as_table(validator):
+    """Hồi quy DC2/DC10: nhãn ngoài vùng rải rác khắp tờ (cùng X/Y ngẫu nhiên) không được gộp thành 'bảng'."""
+    els = grid_elements()
+    k = 0
+    for r in range(6):
+        for c in range(6):
+            k += 1
+            els.append(RawElement(id=f"S{k}", type="text", level=13, text=str(500 + k),
+                                  origin=(X0 + 200 + c * 400, Y0 + 200 + r * 400)))
+    res = validator.validate(sheet(els, scale="1:1000"))
+    assert "NHAN_TRONG_BANG_THONG_KE" not in codes(res)
+    assert codes(res, "error").count("NHAN_NGOAI_VUNG") == 36
+
+
+def test_narrow_label_strip_not_table(validator):
+    """Hồi quy DC2: dải nhãn hẹp-dài (3 cột sát nhau, nhiều hàng) không phải bảng thống kê."""
+    els = grid_elements()
+    k = 0
+    for r in range(15):
+        for c in range(3):
+            k += 1
+            els.append(RawElement(id=f"N{k}", type="text", level=13, text=str(700 + k),
+                                  origin=(X0 + 300 + c * 6, Y0 + 300 + r * 29.4)))
+    res = validator.validate(sheet(els, scale="1:5000"))
+    assert "NHAN_TRONG_BANG_THONG_KE" not in codes(res)
