@@ -18,7 +18,7 @@
     "label_near_boundary_m": 0.2,
     "dangle_near_frame_m": 0.1,
     "outside_frame_ratio": 0.5,
-    "include_frame_in_noding": true,
+    "include_frame_in_noding": false,
     "non_parcel_land_codes": ["DGT", "DTL", "SON", "MNC"],
     "non_parcel_note": "Vùng chỉ có nhãn loại đất thuộc danh sách này (giao thông/thủy hệ) và không có số thửa được báo mức info, không coi là lỗi. Cấu hình tham khảo, cần xác nhận."
   },

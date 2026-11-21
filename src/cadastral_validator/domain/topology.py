@@ -79,8 +79,8 @@ def _snap_lines(lines: list[SourceLine], tol: float) -> tuple[list[LineString], 
             continue
         ref = unary_union(neigh)
         sg = shapely.snap(g, ref, tol)
-        for (x0, y0), (x1, y1) in zip(g.coords, sg.coords):
-            max_shift = max(max_shift, math.hypot(x1 - x0, y1 - y0))
+        # Độ dịch thực = Hausdorff giữa trước/sau (snap có thể thêm/bớt đỉnh nên không ghép cặp đỉnh)
+        max_shift = max(max_shift, g.hausdorff_distance(sg))
         out.append(sg)
     return out, max_shift
 

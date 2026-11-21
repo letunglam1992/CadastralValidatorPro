@@ -17,3 +17,11 @@
 - Chưa đối chiếu GML gốc (Tab 3 Tầng B mục cuối), chưa có nút mở DGN/khoanh Level 63.
 - Chưa có SQLite/GeoPackage issue store, chưa có resume theo job manifest.
 - Chưa benchmark trên dữ liệu thật; không cam kết thời gian.
+
+## Lượt 2 — 21/11/2026: chạy thử trên DC8 thật (macro VBA)
+
+- Macro VBA chạy được trên máy người dùng: 2.142 phần tử, bỏ qua 18 (kiểu 5, 9, 15 ellipse, 56, 66, 96, 97). **Bộ trích xuất VBA: PARTIAL** (chạy được, chưa đối chiếu số lượng với MicroStation).
+- Phát hiện: DC8 **không dùng Level 2/4/13**. `Level.Number` xuất ra 65–75. Sơ đồ suy luận (CHƯA XÁC NHẬN): ranh 67 (dựng 122 vùng), số thửa 71 (151 nhãn), diện tích 72 (123 nhãn), loại đất 65 (mã cũ N, M, 1L, Ao, Hg, GT, T), khung 66 (3.000 × 3.000 m → nghi tỷ lệ 1:5000). Cần biết 65–75 là "Number" hay ID nội bộ → macro đã thêm `level_name` và bảng `levels`.
+- Chữ tiếng Việt dùng bảng mã font MicroStation (ví dụ "XA8 PHI3NG LU4NG" = XÃ PHIÊNG LUÔNG) — cần bảng chuyển mã đã kiểm thử.
+- Bảng thống kê diện tích trong tờ chứa nhãn cùng Level với nhãn thửa → báo "nhãn ngoài vùng" giả. Cần cấu hình vùng loại trừ (G1.1).
+- Lỗi phần mềm phát hiện nhờ dữ liệu thật và đã sửa (có test hồi quy): độ dịch snap tính sai (báo 1.403 m), đưa khung tờ vào dựng vùng (mặc định nay tắt), tên tệp đường dẫn Windows.

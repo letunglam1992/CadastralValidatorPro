@@ -209,3 +209,24 @@ def test_many_sheets_same_parcel_numbers_independent(validator):
     a = validator.validate(sheet(grid_elements(), "DC1"))
     b = validator.validate(sheet(grid_elements(), "DC2"))
     assert a.status == b.status == "OK"
+
+
+def test_snap_shift_is_bounded_by_tolerance(validator):
+    """Hồi quy DC8 thật: độ dịch snap từng báo 1.403 m do ghép cặp đỉnh sai."""
+    els = grid_elements()
+    for e in els:
+        if e.id == "L1":
+            e.coords = [(X0 + W, Y0 + 0.005), (X0 + W, Y0 + 10), (X0 + W, Y0 + 20.004), e.coords[1]]
+    res = validator.validate(sheet(els))
+    assert 0 < res.stats["max_snap_shift_m"] <= 0.01 + 1e-9
+
+
+def test_windows_path_basename(tmp_path):
+    import json
+    from cadastral_validator.adapters.dgn_exchange import load_exchange
+    p = tmp_path / "x.json"
+    p.write_text(json.dumps({"schema": "cvp.dgn_exchange/1", "source": {"path": "D:\\CVP\\DC8.dgn"},
+                             "sheet": {"sheet_id": "DC8.dgn"}, "units": {"master": "m"}, "elements": []}),
+                 encoding="utf-8")
+    s = load_exchange(p)
+    assert s.file_name == "DC8.dgn" and s.sheet_id == "DC8"

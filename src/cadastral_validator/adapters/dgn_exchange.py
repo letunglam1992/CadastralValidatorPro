@@ -17,7 +17,8 @@ Cấu trúc:
 from __future__ import annotations
 
 import json
-from pathlib import Path
+import re
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 from ..domain.models import MapSheet, RawElement, SourceInfo
@@ -65,6 +66,11 @@ def _el_to(e: RawElement) -> dict[str, Any]:
     return d
 
 
+def _basename(p: str) -> str:
+    """Tên tệp từ đường dẫn Windows hoặc POSIX (macro VBA ghi 'D:\\CVP\\DC8.dgn')."""
+    return PureWindowsPath(p).name if "\\" in p or re.match(r"^[A-Za-z]:", p) else Path(p).name
+
+
 def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: str | None = None,
                   crs_confirmed: bool = False) -> MapSheet:
     path = Path(path)
@@ -83,7 +89,7 @@ def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: st
     if sid.lower().endswith(".dgn"):  # macro VBA ghi tên tệp đầy đủ
         sid = sid[:-4]
     return MapSheet(
-        sheet_id=sid, file_name=Path(src.get("path") or path.name).name,
+        sheet_id=sid, file_name=_basename(src.get("path") or path.name),
         elements=[_el_from(e, path.name) for e in data.get("elements", [])],
         source=SourceInfo(path=str(src.get("path") or path), sha256=src.get("sha256"), fmt="dgn_exchange",
                           dgn_version=src.get("dgn_version"), reader=src.get("reader", "unknown"),

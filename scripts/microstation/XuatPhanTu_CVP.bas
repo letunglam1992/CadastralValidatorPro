@@ -66,7 +66,11 @@ Private Function ElemJson(el As Element) As String
         Exit Function
     End If
     s = "{""id"":" & JsonStr(DLongToString(el.ID)) & ",""type"":""" & t & """,""level"":"
-    If el.Level Is Nothing Then s = s & "0" Else s = s & CStr(el.Level.Number)
+    If el.Level Is Nothing Then
+        s = s & "0"
+    Else
+        s = s & CStr(el.Level.Number) & ",""level_name"":" & JsonStr(el.Level.Name)
+    End If
     Select Case el.Type
         Case msdElementTypeLine, msdElementTypeLineString, msdElementTypeShape
             v = el.AsVertexList.GetVertices
@@ -102,6 +106,16 @@ Private Function ElemJson(el As Element) As String
     ElemJson = s & "}"
 End Function
 
+Private Function LevelsJson() As String
+    Dim lvl As Level, r As String
+    r = ""
+    For Each lvl In ActiveDesignFile.Levels
+        If r <> "" Then r = r & ","
+        r = r & "{""number"":" & CStr(lvl.Number) & ",""name"":" & JsonStr(lvl.Name) & "}"
+    Next lvl
+    LevelsJson = r
+End Function
+
 Public Sub XuatPhanTuJSON()
     Dim ee As ElementEnumerator, j As String, fn As String, i As Long, st As String
     Dim stm As Object, t0 As Single
@@ -115,7 +129,7 @@ Public Sub XuatPhanTuJSON()
     stm.WriteText "{""schema"":""cvp.dgn_exchange/1"",""source"":{""path"":" & JsonStr(ActiveDesignFile.FullName) & _
           ",""dgn_version"":""V8"",""reader"":""microstation_vba"",""is_synthetic"":false}," & _
           """sheet"":{""sheet_id"":" & JsonStr(ActiveDesignFile.Name) & "},""units"":{""master"":""m""}," & _
-          """elements"":[" & vbLf
+          """levels"":[" & LevelsJson() & "]," & """elements"":[" & vbLf
 
     ShowStatus "CVP: dang xuat phan tu..."
     Set ee = ActiveModelReference.Scan
