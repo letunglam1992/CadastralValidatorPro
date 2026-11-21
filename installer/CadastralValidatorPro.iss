@@ -2,7 +2,7 @@
 ; Cài theo người dùng (không cần quyền quản trị) vào %LOCALAPPDATA%\Programs\CadastralValidatorPro
 #define AppName "CadastralValidatorPro"
 #ifndef AppVersion
-  #define AppVersion "0.2.2"
+  #define AppVersion "0.2.3"
 #endif
 
 [Setup]

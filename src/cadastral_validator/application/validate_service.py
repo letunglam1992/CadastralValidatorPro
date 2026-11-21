@@ -109,6 +109,9 @@ class Validator:
     # ------------------------------------------------------- linework (DGN)
     def _validate_linework(self, sheet: MapSheet, res: SheetResult, params: dict):
         lv, lvinfo = resolve_levels(self.cfg.levels, sheet)
+        n_lverr = sum(1 for e in sheet.elements if e.extra.get("level_error"))
+        if n_lverr:
+            res.stats["phan_tu_khong_doc_duoc_level"] = n_lverr
         res.stats["level_profile"] = self.cfg.levels.profile_id
         res.stats["level_resolution"] = lvinfo
         if lvinfo.get("missing"):

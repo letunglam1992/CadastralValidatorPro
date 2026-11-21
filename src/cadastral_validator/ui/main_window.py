@@ -321,7 +321,7 @@ class CheckTab(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CadastralValidatorPro 0.2.2 — Kiểm tra dữ liệu bản đồ địa chính")
+        self.setWindowTitle("CadastralValidatorPro 0.2.3 — Kiểm tra dữ liệu bản đồ địa chính")
         self.resize(1280, 800)
         w = QWidget(); lay = QHBoxLayout(w); lay.setContentsMargins(0, 0, 0, 0); lay.setSpacing(0)
         left = QFrame(); left.setFixedWidth(270); ll = QVBoxLayout(left); ll.setContentsMargins(0, 0, 0, 0)

@@ -55,6 +55,22 @@ Private Function TypeName2(ByVal t As Long) As String
     End Select
 End Function
 
+Private Function LevelJson(el As Element) As String
+    ' Doc Level co bao ve loi (Level Error 32768 khi tep khong phai tep dang mo)
+    Dim num As Long, nm As String, ok As Boolean
+    On Error GoTo Hong
+    If el.Level Is Nothing Then
+        LevelJson = "0"
+        Exit Function
+    End If
+    num = el.Level.Number
+    nm = el.Level.Name
+    LevelJson = CStr(num) & ",""level_name"":" & JsonStr(nm)
+    Exit Function
+Hong:
+    LevelJson = "0,""level_error"":true"
+End Function
+
 Private Function ElemJson(el As Element) As String
     Dim t As String, s As String, v() As Point3d, i As Long
     Dim en As ElementEnumerator, kids As String, cj As String
@@ -66,11 +82,7 @@ Private Function ElemJson(el As Element) As String
         Exit Function
     End If
     s = "{""id"":" & JsonStr(DLongToString(el.ID)) & ",""type"":""" & t & """,""level"":"
-    If el.Level Is Nothing Then
-        s = s & "0"
-    Else
-        s = s & CStr(el.Level.Number) & ",""level_name"":" & JsonStr(el.Level.Name)
-    End If
+    s = s & LevelJson(el)
     Select Case el.Type
         Case msdElementTypeLine, msdElementTypeLineString, msdElementTypeShape
             v = el.AsVertexList.GetVertices
@@ -166,10 +178,11 @@ Public Sub XuatPhanTuJSON()
                 ActiveDesignFile.FullName & ".cvp.json"
 End Sub
 
-' Xuat TAT CA tep .dgn trong mot thu muc (mo CHI DOC, khong hien len man hinh, khong sua tep)
+' Xuat TAT CA tep .dgn trong mot thu muc: mo LAN LUOT tung tep len man hinh o che do CHI DOC,
+' xuat JSON, cuoi cung mo lai tep ban dau. Khong sua tep.
 Public Sub XuatThuMucJSON()
     Dim folder As String, f As String, files() As String, nF As Long, k As Long
-    Dim df As DesignFile, n As Long, rep As String, okN As Long, errN As Long, msg As String
+    Dim n As Long, rep As String, okN As Long, errN As Long, msg As String, goc As String
     folder = InputBox("Thu muc chua cac tep DGN can xuat:", "CVP - xuat ca thu muc", ActiveDesignFile.Path)
     If folder = "" Then Exit Sub
     If Right$(folder, 1) <> "\" Then folder = folder & "\"
@@ -183,33 +196,29 @@ Public Sub XuatThuMucJSON()
         ShowMessage "CVP: khong co tep .dgn trong " & folder
         Exit Sub
     End If
+    goc = ActiveDesignFile.FullName
     rep = ""
     For k = 0 To nF - 1
         On Error GoTo LoiTep
-        If LCase$(folder & files(k)) = LCase$(ActiveDesignFile.FullName) Then
-            n = XuatMotTep(ActiveDesignFile)
-        Else
-            Set df = OpenDesignFileForProgram(folder & files(k), True)
-            n = XuatMotTep(df)
-            df.Close
-            Set df = Nothing
+        If LCase$(folder & files(k)) <> LCase$(ActiveDesignFile.FullName) Then
+            OpenDesignFile folder & files(k), True
         End If
+        n = XuatMotTep(ActiveDesignFile)
         rep = rep & files(k) & ": " & n & " phan tu, bo qua " & nSkip & vbLf
         okN = okN + 1
         GoTo TiepTheo
 LoiTep:
         msg = Err.Description
-        Resume DonDep
-DonDep:
-        On Error Resume Next
-        If Not df Is Nothing Then df.Close
-        Set df = Nothing
-        On Error GoTo 0
+        Resume GhiLoi
+GhiLoi:
         rep = rep & files(k) & ": LOI " & msg & vbLf
         errN = errN + 1
 TiepTheo:
         On Error GoTo 0
     Next k
+    On Error Resume Next
+    If LCase$(goc) <> LCase$(ActiveDesignFile.FullName) Then OpenDesignFile goc, False
+    On Error GoTo 0
     ShowMessage "CVP: xong " & okN & " tep, loi " & errN & " tep"
     MsgBox "CVP - ket qua xuat thu muc " & folder & vbLf & vbLf & rep, vbInformation, "CVP"
 End Sub
