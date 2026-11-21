@@ -70,11 +70,15 @@ def _convert(app, el, stats: dict) -> Optional[RawElement]:
     stats[name or f"type_{t}"] = stats.get(name or f"type_{t}", 0) + 1
     if name is None:
         return None
+    level, lname = 0, None
     try:
-        level = int(el.Level.Number) if el.Level is not None else 0
+        if el.Level is not None:
+            level, lname = int(el.Level.Number), str(el.Level.Name)
     except Exception:
-        level = 0
+        pass
     r = RawElement(id=_id(app, el), type=name, level=level)
+    if lname is not None:
+        r.extra["level_name"] = lname
     if t in (T_LINE, T_LINESTRING, T_SHAPE):
         r.coords = [_pt(p) for p in el.AsVertexList.GetVertices()]
         r.closed = t == T_SHAPE
@@ -127,8 +131,17 @@ def extract_dgn(path: str | Path, scale: str = "1:1000", crs_profile_id: str | N
     pythoncom.CoInitialize()
     stats: dict[str, Any] = {}
     try:
-        app = win32com.client.Dispatch(PROGID)
+        try:   # typed dispatch (makepy) để pywin32 hiểu kiểu Point3d của MicroStation
+            app = win32com.client.gencache.EnsureDispatch(PROGID)
+        except Exception:
+            app = win32com.client.Dispatch(PROGID)
         dgn = app.OpenDesignFileForProgram(str(path), True)   # True = ReadOnly
+        level_table = []
+        try:
+            for lv in dgn.Levels:
+                level_table.append({"number": int(lv.Number), "name": str(lv.Name)})
+        except Exception:
+            pass
         try:
             model = dgn.DefaultModelReference
             en = model.Scan()
@@ -144,5 +157,5 @@ def extract_dgn(path: str | Path, scale: str = "1:1000", crs_profile_id: str | N
     sheet = MapSheet(sheet_id=path.stem, file_name=path.name, elements=elements, scale=scale,
                      source=SourceInfo(path=str(path), sha256=prof.sha256, fmt="dgn", dgn_version=prof.version,
                                        reader="microstation_com", reader_status=CapabilityStatus.NOT_TESTED.value),
-                     crs_profile_id=crs_profile_id, crs_confirmed=crs_confirmed)
+                     crs_profile_id=crs_profile_id, crs_confirmed=crs_confirmed, level_table=level_table)
     return sheet, stats

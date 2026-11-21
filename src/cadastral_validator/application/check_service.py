@@ -41,10 +41,46 @@ def expand_inputs(paths: list[Path]) -> list[Path]:
     exts = {".json", ".dgn", ".shp", ".gml"}
     for p in paths:
         if p.is_dir():
-            out += sorted(q for q in p.iterdir() if q.suffix.lower() in exts and not q.name.endswith(".tmp"))
+            items = sorted(q for q in p.iterdir() if q.suffix.lower() in exts and not q.name.endswith(".tmp"))
+            dgns = {q.name.lower() for q in items if q.suffix.lower() == ".dgn"}
+            # X.dgn.cvp.json đi kèm X.dgn -> chỉ giữ X.dgn (tự dùng tệp xuất sẵn)
+            out += [q for q in items if not (q.name.lower().endswith(".dgn.cvp.json")
+                                             and q.name[:-len(".cvp.json")].lower() in dgns)]
         else:
             out.append(p)
     return out
+
+
+def sidecar_for(dgn: Path) -> Path:
+    return dgn.with_name(dgn.name + ".cvp.json")
+
+
+def load_dgn(p: Path, o: CheckOptions):
+    """Chọn thẳng tệp .dgn:
+    1) dùng tệp xuất bằng macro <tên>.dgn.cvp.json nếu có và mới hơn DGN;
+    2) nếu không, đọc qua MicroStation COM (chỉ đọc);
+    3) nếu không được, báo hướng dẫn rõ ràng."""
+    from ..adapters.dgn_probe import sha256_file
+    side = sidecar_for(p)
+    if side.exists() and side.stat().st_mtime >= p.stat().st_mtime:
+        sheet = dgn_exchange.load_exchange(side, o.scale, o.crs_profile_id, o.crs_confirmed)
+        sheet.source.reader = "microstation_vba (tệp xuất sẵn)"
+        sheet.file_name, sheet.source.path = p.name, str(p)
+        sheet.source.sha256 = sha256_file(p)
+        return sheet, {"via": "sidecar", "sidecar": str(side)}
+    stale = " (tệp .cvp.json cũ hơn DGN — bỏ qua)" if side.exists() else ""
+    from ..adapters.microstation_com import MicroStationUnavailable, extract_dgn
+    try:
+        sheet, stats = extract_dgn(p, o.scale, o.crs_profile_id, o.crs_confirmed)
+        return sheet, {"via": "com", "stats": stats}
+    except MicroStationUnavailable as e:
+        raise RuntimeError(
+            f"Chưa đọc được {p.name}{stale}: {e} Cách xử lý: trong MicroStation chạy macro "
+            f"XuatThuMucJSON (hoặc XuatPhanTuJSON) để tạo {side.name} cạnh tệp DGN, rồi chọn lại tệp .dgn.") from e
+    except Exception as e:  # lỗi COM khi đọc
+        raise RuntimeError(
+            f"Đọc {p.name} qua MicroStation COM bị lỗi: {type(e).__name__}: {e}{stale}. "
+            f"Tạm thời dùng macro XuatThuMucJSON để tạo {side.name}, rồi chọn lại tệp .dgn.") from e
 
 
 def load_sheet(p: Path, o: CheckOptions):
@@ -52,8 +88,7 @@ def load_sheet(p: Path, o: CheckOptions):
     if ext == ".json":
         return dgn_exchange.load_exchange(p, o.scale, o.crs_profile_id, o.crs_confirmed), {}
     if ext == ".dgn":
-        from ..adapters.microstation_com import extract_dgn
-        return extract_dgn(p, o.scale, o.crs_profile_id, o.crs_confirmed)
+        return load_dgn(p, o)
     if ext == ".shp":
         from ..adapters.polygon_sources import read_shp
         return read_shp(p, o.field_map, o.dbf_encoding, o.scale, o.crs_profile_id, o.crs_confirmed)
@@ -104,6 +139,6 @@ def run_check(o: CheckOptions, progress: Optional[Callable[[int, int, str], None
             "crs_profile": o.crs_profile_id, "crs_confirmed": o.crs_confirmed,
             "area_reference": o.area_reference or cfg.levels.area_reference or "grid",
             "mean_height_m": o.mean_height_m if o.mean_height_m is not None else cfg.levels.mean_height_m,
-            "app_version": "0.2.0"}
+            "app_version": "0.2.1"}
     paths = write_all(results, o.out_dir, meta, html=o.html)
     return results, {"meta": meta, "paths": {k: str(v) for k, v in paths.items()}}

@@ -105,3 +105,25 @@ def test_sheet_profile_scale_and_height(tmp_path):
     assert st["scale"] == "1:5000" and st["area_reference"] == "ground" and st["mean_height_m"] == 904
     assert info["meta"]["scale"] == "1:5000"
     assert res[0].status == "OK"   # 400 m² lưới -> mặt đất lệch << hạn sai 1:5000
+
+
+def test_choose_dgn_directly_uses_sidecar(tmp_path):
+    """Chọn thẳng .dgn: dùng <tên>.dgn.cvp.json xuất sẵn nếu mới hơn DGN; thư mục không bị đếm trùng."""
+    import os, time
+    dgn = tmp_path / "DC5.dgn"
+    dgn.write_bytes(bytes.fromhex("d0cf11e0a1b11ae1") + b"\0" * 64)
+    old = time.time() - 100
+    os.utime(dgn, (old, old))
+    save_exchange(sheet(grid_elements(), "DC5"), tmp_path / "DC5.dgn.cvp.json")
+    res, _ = run_check(CheckOptions(inputs=[tmp_path], out_dir=tmp_path / "o", html=False,
+                                    crs_profile_id="VN2000_TM3_104", crs_confirmed=True))
+    assert len(res) == 1 and res[0].file_name.endswith(".dgn") and res[0].status == "OK"
+    assert "tệp xuất sẵn" in res[0].stats["reader"]
+
+
+def test_choose_dgn_without_export_gives_guidance(tmp_path):
+    dgn = tmp_path / "DC6.dgn"
+    dgn.write_bytes(bytes.fromhex("d0cf11e0a1b11ae1") + b"\0" * 64)
+    res, _ = run_check(CheckOptions(inputs=[dgn], out_dir=tmp_path / "o", html=False))
+    assert res[0].status == "KHONG_DOC_DUOC"
+    assert "XuatThuMucJSON" in res[0].message

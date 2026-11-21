@@ -1,0 +1,31 @@
+{
+  "profile_id": "SON_LA_TEN_LEVEL_CHUNG_v1",
+  "classification": "LOCAL_CONFIG",
+  "verification_status": "PENDING_VERIFICATION",
+  "note": "Hồ sơ chung theo TÊN Level giống DC8 (L, TCT, DIENTICH3, C, KG-5000) cho các tờ cùng đơn vị lập. Chưa xác nhận cho từng tờ: phần mềm báo 'Không tìm thấy Level theo tên' nếu tờ dùng tên khác. Không gán sẵn tỷ lệ/độ cao — chọn tỷ lệ trên giao diện.",
+  "level_names": {
+    "boundary": [
+      "L"
+    ],
+    "parcel_no": [
+      "TCT"
+    ],
+    "area": [
+      "DIENTICH3"
+    ],
+    "land_type": [
+      "C"
+    ],
+    "frame": [
+      "KG-5000"
+    ]
+  },
+  "frame_levels": [],
+  "label_cell_names": [
+    "NHANTHUA"
+  ],
+  "error_overlay_level": 63,
+  "exclusion_boxes": [],
+  "area_reference": "ground",
+  "mean_height_m": null
+}
