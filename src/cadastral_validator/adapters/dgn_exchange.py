@@ -79,8 +79,11 @@ def load_exchange(path: str | Path, scale: str | None = None, crs_profile_id: st
     units = data.get("units", {}).get("master", "m")
     if units != "m":
         raise ExchangeError(f"{path.name}: master unit '{units}' — chỉ hỗ trợ m ở G1 (cần xác nhận UOR/working units)")
+    sid = str(sh.get("sheet_id") or path.stem)
+    if sid.lower().endswith(".dgn"):  # macro VBA ghi tên tệp đầy đủ
+        sid = sid[:-4]
     return MapSheet(
-        sheet_id=str(sh.get("sheet_id") or path.stem), file_name=Path(src.get("path") or path.name).name,
+        sheet_id=sid, file_name=Path(src.get("path") or path.name).name,
         elements=[_el_from(e, path.name) for e in data.get("elements", [])],
         source=SourceInfo(path=str(src.get("path") or path), sha256=src.get("sha256"), fmt="dgn_exchange",
                           dgn_version=src.get("dgn_version"), reader=src.get("reader", "unknown"),

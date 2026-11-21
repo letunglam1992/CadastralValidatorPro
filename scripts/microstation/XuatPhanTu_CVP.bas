@@ -1,16 +1,18 @@
 Attribute VB_Name = "XuatPhanTu_CVP"
 ' =============================================================================
-' CadastralValidatorPro - Macro VBA xuất phần tử DGN ra JSON (cvp.dgn_exchange/1)
-' Chạy TRONG MicroStation V8i: Utilities > Macro > Project Manager > Load .bas
-' rồi chạy XuatPhanTuJSON. Macro CHỈ ĐỌC model hiện hành, không sửa bản vẽ.
-' TRẠNG THÁI: NOT_TESTED trên máy thật - cần nghiệm thu với DC1..DC10.dgn.
-' Văn bản tiếng Việt được ghi dạng \uXXXX nên không phụ thuộc mã trang.
-' Cung tròn/ellipse/B-spline: chưa rời rạc hóa, chỉ đếm (báo trong "stats").
+' CadastralValidatorPro - Macro VBA xuat phan tu DGN ra JSON (cvp.dgn_exchange/1)
+' Chay TRONG MicroStation V8i. Macro CHI DOC model hien hanh, KHONG sua ban ve.
+' Ket qua: <ten tep>.dgn.cvp.json nam canh tep DGN.
+' TRANG THAI: NOT_TESTED tren may that - can nghiem thu voi DC8.dgn.
+' Van ban tieng Viet ghi dang \uXXXX nen khong phu thuoc ma trang/font.
+' Cung tron/ellipse/B-spline: chua roi rac hoa, chi dem (muc "stats").
+' (Tep nay co y viet KHONG DAU de VBA Editor nhap khong loi ma.)
 ' =============================================================================
 Option Explicit
 
 Private nOut As Long
 Private nSkip As Long
+Private nTypes(0 To 127) As Long
 
 Private Function JsonStr(ByVal s As String) As String
     Dim i As Long, c As Long, r As String
@@ -55,7 +57,8 @@ End Function
 
 Private Function ElemJson(el As Element) As String
     Dim t As String, s As String, v() As Point3d, i As Long
-    Dim en As ElementEnumerator, kids As String
+    Dim en As ElementEnumerator, kids As String, cj As String
+    If el.Type >= 0 And el.Type <= 127 Then nTypes(el.Type) = nTypes(el.Type) + 1
     t = TypeName2(el.Type)
     If t = "" Then
         nSkip = nSkip + 1
@@ -88,7 +91,6 @@ Private Function ElemJson(el As Element) As String
             End If
             kids = ""
             Do While en.MoveNext
-                Dim cj As String
                 cj = ElemJson(en.Current)
                 If cj <> "" Then
                     If kids <> "" Then kids = kids & ","
@@ -101,29 +103,42 @@ Private Function ElemJson(el As Element) As String
 End Function
 
 Public Sub XuatPhanTuJSON()
-    Dim ee As ElementEnumerator, out As String, j As String, fn As String
-    Dim stm As Object
+    Dim ee As ElementEnumerator, j As String, fn As String, i As Long, st As String
+    Dim stm As Object, t0 As Single
+    t0 = Timer
     nOut = 0: nSkip = 0
+    For i = 0 To 127: nTypes(i) = 0: Next i
     fn = ActiveDesignFile.FullName & ".cvp.json"
+
+    Set stm = CreateObject("ADODB.Stream")
+    stm.Type = 2: stm.Charset = "us-ascii": stm.Open
+    stm.WriteText "{""schema"":""cvp.dgn_exchange/1"",""source"":{""path"":" & JsonStr(ActiveDesignFile.FullName) & _
+          ",""dgn_version"":""V8"",""reader"":""microstation_vba"",""is_synthetic"":false}," & _
+          """sheet"":{""sheet_id"":" & JsonStr(ActiveDesignFile.Name) & "},""units"":{""master"":""m""}," & _
+          """elements"":[" & vbLf
+
+    ShowStatus "CVP: dang xuat phan tu..."
     Set ee = ActiveModelReference.Scan
-    out = ""
     Do While ee.MoveNext
         j = ElemJson(ee.Current)
         If j <> "" Then
-            If nOut > 0 Then out = out & "," & vbLf
-            out = out & j
+            If nOut > 0 Then stm.WriteText "," & vbLf
+            stm.WriteText j
             nOut = nOut + 1
+            If nOut Mod 2000 = 0 Then ShowStatus "CVP: da xuat " & nOut & " phan tu..."
         End If
     Loop
-    out = "{""schema"":""cvp.dgn_exchange/1"",""source"":{""path"":" & JsonStr(ActiveDesignFile.FullName) & _
-          ",""dgn_version"":""V8"",""reader"":""microstation_vba"",""is_synthetic"":false}," & _
-          """sheet"":{""sheet_id"":" & JsonStr(ActiveDesignFile.Name) & "},""units"":{""master"":""m""}," & _
-          """stats"":{""exported"":" & nOut & ",""skipped_unsupported"":" & nSkip & "}," & _
-          """elements"":[" & out & "]}"
-    Set stm = CreateObject("ADODB.Stream")
-    stm.Type = 2: stm.Charset = "us-ascii": stm.Open
-    stm.WriteText out
+
+    st = ""
+    For i = 0 To 127
+        If nTypes(i) > 0 Then
+            If st <> "" Then st = st & ","
+            st = st & """" & i & """:" & nTypes(i)
+        End If
+    Next i
+    stm.WriteText vbLf & "],""stats"":{""exported"":" & nOut & ",""skipped_unsupported"":" & nSkip & _
+                  ",""element_types"":{" & st & "},""seconds"":" & Num(Timer - t0) & "}}"
     stm.SaveToFile fn, 2
     stm.Close
-    ShowMessage "CVP: da xuat " & nOut & " phan tu (bo qua " & nSkip & ") -> " & fn
+    ShowMessage "CVP: da xuat " & nOut & " phan tu (bo qua " & nSkip & " phan tu cung/ellipse/khac) -> " & fn
 End Sub
