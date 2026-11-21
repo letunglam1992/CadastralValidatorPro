@@ -33,13 +33,17 @@ def test_gui_six_tabs_and_tab3_results(tmp_path):
 
 def test_gui_shows_full_read_error(tmp_path):
     from PySide6.QtWidgets import QApplication
-    from cadastral_validator.ui.main_window import CheckTab
+    from cadastral_validator.ui.main_window import MainWindow
     app = QApplication.instance() or QApplication([])
     dgn = tmp_path / "DC9.dgn"
     dgn.write_bytes(bytes.fromhex("d0cf11e0a1b11ae1") + b"\0" * 64)
     res, info = run_check(CheckOptions(inputs=[dgn], out_dir=tmp_path / "o", html=False))
-    tab = CheckTab()
+    win = MainWindow()
+    tab = win.stack.widget(2)
     tab.show_results(res, info)
     assert tab.issues.rowCount() == 1
     assert "XuatThuMucJSON" in tab.issues.item(0, 2).text()
     assert tab.sheets.item(0, 8).toolTip() == res[0].message
+    win.close()
+    win.deleteLater()
+    app.processEvents()
