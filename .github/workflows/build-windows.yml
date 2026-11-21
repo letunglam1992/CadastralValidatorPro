@@ -2,6 +2,11 @@ name: Build Windows installer
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag phát hành (vd v0.2.0); để trống = chỉ build"
+        required: false
+        default: ""
   push:
     tags: ["v*"]
 
@@ -58,10 +63,13 @@ jobs:
           name: CadastralValidatorPro_Setup
           path: dist_installer/*.exe
 
-      - name: Phát hành (khi đẩy tag v*)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Phát hành lên GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          name: CadastralValidatorPro ${{ inputs.release_tag || github.ref_name }}
           files: dist_installer/*.exe
           body: |
             Bộ cài Windows 10/11 x64 (không cần quyền quản trị). Build tự động bằng GitHub Actions.
