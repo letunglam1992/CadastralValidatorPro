@@ -72,6 +72,8 @@ class MapSheet:
     features: list["PolygonFeature"] = field(default_factory=list)
     coverage: Any = None           # vùng bao phủ hợp lệ do người dùng cung cấp (shapely Polygon)
     level_table: list[dict[str, Any]] = field(default_factory=list)   # [{"number":67,"name":"L"}]
+    area_reference: str = "grid"   # grid | ellipsoid | ground — mặt tính diện tích ghi trên nhãn
+    mean_height_m: Optional[float] = None
 
 
 @dataclass

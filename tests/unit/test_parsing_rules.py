@@ -51,7 +51,9 @@ def test_vietnamese_unicode_normalization():
 def test_rulepack_loads_and_all_rules_pending():
     p = load_rulepack(CONFIG_DIR / "rulepacks" / "son_la_draft.json")
     assert p.approval_status == "DRAFT"
-    assert all(r.verification_status == "PENDING_VERIFICATION" for r in p.rules.values())
+    assert all(r.verification_status == "PENDING_VERIFICATION" for c, r in p.rules.items() if c != "SAI_DIEN_TICH")
+    assert p.rule("SAI_DIEN_TICH").verification_status == "VERIFIED_PARTIAL"
+    assert p.rule("SAI_DIEN_TICH").legal_refs[0]["appendix"] == "Phụ lục số 04"
     assert not any(r.can_auto_fix for r in p.rules.values())
     assert p.params_for_scale("1:1000")["snap_tolerance_m"] == 0.01
 

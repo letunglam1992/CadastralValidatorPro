@@ -108,15 +108,16 @@ def export_excel(results: list[SheetResult], path: Path, meta: dict):
 
     wd = wb.create_sheet("ChiTietLoi")
     cols2 = ["Mã lỗi (ID)", "Tệp", "Mã", "Rule", "Mức độ", "Nội dung", "X", "Y", "Thửa liên quan",
-             "Phần tử nguồn", "Đề xuất xử lý", "Trạng thái xác minh rule", "Phiên bản rule", "Trạng thái xử lý"]
+             "Phần tử nguồn", "Đề xuất xử lý", "Trạng thái xác minh rule", "Phiên bản rule", "Trạng thái xử lý",
+             "Mã loại đất mới (người dùng nhập)", "Ghi chú người kiểm tra"]
     header(wd, 1, cols2)
     for r in results:
         for i in r.issues:
             wd.append([i.issue_id, r.file_name, i.code, i.rule_id, SEV_VI.get(i.severity, i.severity), i.message,
                        round(i.x, 3) if i.x is not None else None, round(i.y, 3) if i.y is not None else None,
                        "; ".join(i.parcel_ids), "; ".join(i.source_element_ids), i.suggested_fix or "",
-                       i.verification_status, i.rule_version, i.status])
-    for i, w in enumerate([14, 16, 24, 10, 10, 80, 14, 14, 20, 20, 40, 22, 10, 12], 1):
+                       i.verification_status, i.rule_version, i.status, "", ""])
+    for i, w in enumerate([14, 16, 24, 10, 10, 80, 14, 14, 20, 20, 40, 22, 10, 12, 22, 30], 1):
         wd.column_dimensions[get_column_letter(i)].width = w
     wd.auto_filter.ref = f"A1:{get_column_letter(len(cols2))}{max(1, wd.max_row)}"
     wd.freeze_panes = "A2"

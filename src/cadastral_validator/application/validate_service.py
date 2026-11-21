@@ -14,6 +14,8 @@ from shapely.geometry import Point, Polygon
 
 from ..domain.labels import count_by_kind, extract_labels
 from ..domain.level_resolve import resolve_levels
+from ..domain.area_tolerance import area_tolerance_tt26, LEGAL_REF as PL04_REF
+from ..domain.area_reference import compare_area
 from ..domain.models import Issue, Label, LabelKind, MapSheet, Parcel, SheetResult
 from ..domain.rules import RulePack
 from ..domain.textparse import count_decimals, parse_area, round_half_up, validate_land_code
@@ -57,6 +59,11 @@ class Validator:
         res.stats["source_sha256"] = sheet.source.sha256
         res.stats["reader"] = sheet.source.reader
         res.stats["synthetic"] = sheet.source.is_synthetic
+        prof = self.cfg.crs_profiles.get(sheet.crs_profile_id or "")
+        self._ctx = {"scale": sheet.scale, "area_ref": sheet.area_reference, "h": sheet.mean_height_m,
+                     "crs": prof if (prof and sheet.crs_confirmed) else None}
+        res.stats["area_reference"] = sheet.area_reference
+        res.stats["mean_height_m"] = sheet.mean_height_m
 
         self._check_crs(sheet, res)
         if sheet.features:
@@ -270,7 +277,7 @@ class Validator:
             pn, ar, lt = by[LabelKind.PARCEL_NO], by[LabelKind.AREA], by[LabelKind.LAND_TYPE]
             if pn:
                 parcel.parcel_no = pn[0].text_norm
-            if ar:
+            if len(ar) == 1:   # nhiều nhãn diện tích -> đã báo TRUNG_NHAN, không so diện tích (tránh so nhầm)
                 parcel.area_label = ar[0].text_norm
             if lt:
                 parcel.land_type = lt[0].text_norm
@@ -304,7 +311,7 @@ class Validator:
                 self._issue(res, "THIEU_NHAN_PHU", f"Thửa {parcel.parcel_no}: thiếu nhãn {', '.join(missing)}.",
                             loc, [pid], ids, geom=reg)
             self._check_parcel_attrs(res, parcel, params, loc, ids,
-                                     area_label_elem=ar[0].source_element_id if ar else None)
+                                     area_label_elem=ar[0].source_element_id if len(ar) == 1 else None)
             if frame is not None:
                 outside = reg.difference(frame).area / reg.area if reg.area else 0
                 if outside > params.get("outside_frame_ratio", 0.5):
@@ -324,7 +331,9 @@ class Validator:
                 self._issue(res, "MA_DAT_KHONG_HOP_LE",
                             f"Thửa {pn}: mã loại đất '{parcel.land_type}' có mã ngoài danh mục cấu hình: {bad}.",
                             loc, [parcel.internal_id], ids,
-                            suggested_fix=(f"Gợi ý theo bảng ánh xạ CHƯA PHÊ DUYỆT: {sug[0]}" if sug else None))
+                            suggested_fix=("Người dùng tự nhập mã loại đất mới (cột 'Mã loại đất mới'); "
+                                           "phần mềm không tự ánh xạ."
+                                           + (f" Tham khảo ánh xạ CHƯA PHÊ DUYỆT: {sug[0]}" if sug else "")))
         if parcel.area_geom < params["min_parcel_warning_area_m2"]:
             self._issue(res, "THUA_NHO", f"Thửa {pn}: diện tích hình học {parcel.area_geom:.2f} m² nhỏ hơn "
                         f"{params['min_parcel_warning_area_m2']} m² — cần kiểm tra.", loc, [parcel.internal_id], ids)
@@ -342,18 +351,27 @@ class Validator:
             self._issue(res, "SAI_QUY_CACH_LAM_TRON",
                         f"Thửa {pn}: diện tích '{parcel.area_label}' không đúng {dp} chữ số thập phân theo cấu hình.",
                         loc, [parcel.internal_id], [area_label_elem] if area_label_elem else ids)
-        tol = params.get("area_abs_tolerance_m2")
-        delta = abs(float(val) - parcel.area_geom)
-        rounded = round_half_up(parcel.area_geom, dp if isinstance(dp, int) else 1)
-        ev = {"nhan": str(val), "hinh_hoc": round(parcel.area_geom, 4), "lech": round(delta, 4), "nguong": tol,
-              "crs_confirmed": res.stats.get("crs_confirmed")}
+        ctx = getattr(self, "_ctx", {"scale": res.stats.get("scale"), "area_ref": "grid", "h": None, "crs": None})
+        a_cmp, a_note = compare_area(parcel.geometry, ctx["area_ref"], ctx["crs"], ctx["h"])
+        method = params.get("area_tolerance_method", "ABS")
+        if method == "TT26_PL04":
+            tol = area_tolerance_tt26(ctx["scale"], a_cmp)
+            basis = "PL04 TT 26/2024 (khoản 5 Điều 8)"
+        else:
+            tol = params.get("area_abs_tolerance_m2")
+            basis = "ngưỡng tuyệt đối cấu hình"
+        delta = abs(float(val) - a_cmp)
+        rounded = round_half_up(a_cmp, dp if isinstance(dp, int) else 1)
+        ev = {"nhan": str(val), "dien_tich_so_sanh": round(a_cmp, 4), "mat_so_sanh": a_note,
+              "dien_tich_luoi": round(parcel.area_geom, 4), "lech": round(delta, 4), "nguong": tol,
+              "can_cu_nguong": basis, "crs_confirmed": res.stats.get("crs_confirmed")}
         if tol is None:
             return
         if delta > tol:
             note = "" if res.stats.get("crs_confirmed") else " [CRS chưa xác nhận — chỉ tham khảo]"
             self._issue(res, "SAI_DIEN_TICH",
-                        f"Thửa {pn}: sai lệch diện tích (Nhãn={val}, Tọa độ={rounded}, Lệch={delta:.3f} m² > "
-                        f"Ngưỡng={tol} m²).{note} Không tự sửa diện tích pháp lý.",
+                        f"Thửa {pn}: sai lệch diện tích (Nhãn={val}, Tọa độ={rounded} m² [{a_note}], "
+                        f"Lệch={delta:.2f} m² > Hạn sai={tol} m² theo {basis}).{note} Không tự sửa diện tích pháp lý.",
                         loc, [parcel.internal_id], ids, evidence=ev)
 
     def _check_duplicates(self, res: SheetResult, parcels: list[Parcel]):

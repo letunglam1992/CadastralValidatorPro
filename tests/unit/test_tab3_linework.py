@@ -261,3 +261,11 @@ def test_level_names_resolution(validator):
     res = Validator(cfg, validator.pack).validate(sheet(els))
     assert res.status == "OK", codes(res)
     assert res.stats["level_resolution"]["resolved"]["TCT"]["source"] == "element.level_name"
+
+
+def test_no_area_compare_when_two_area_labels(validator):
+    """Hồi quy DC8 (thửa 9, 26): vùng có 2 nhãn diện tích -> chỉ TRUNG_NHAN, không SAI_DIEN_TICH."""
+    els = grid_elements()
+    els.append(RawElement(id="A2", type="text", level=4, text="1423.8", origin=(X0 + 3, Y0 + 3)))
+    res = validator.validate(sheet(els))
+    assert "TRUNG_NHAN" in codes(res) and "SAI_DIEN_TICH" not in codes(res)

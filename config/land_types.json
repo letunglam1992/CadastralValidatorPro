@@ -3,9 +3,55 @@
   "verification_status": "PENDING_VERIFICATION",
   "basis": "Danh mục do người dùng cung cấp trong 'Bo quy tac.json'. Cần đồng bộ đầy đủ theo Luật Đất đai 2024, NĐ 102/2024/NĐ-CP và phụ lục TT 26/2024 (đã sửa đổi) trước khi dùng cho hồ sơ sản xuất.",
   "groups": {
-    "nong_nghiep": ["LUC", "LUK", "BHK", "CLN", "RSX", "RPH", "RDD", "NTS", "LMU", "NKH", "CNK", "HNK"],
-    "phi_nong_nghiep": ["ONT", "ODT", "TSC", "CQP", "CAN", "DSN", "DVH", "DXH", "DYT", "DGD", "DTT", "SKK", "SKN", "SKC", "SKS", "TMD", "DGT", "DTL", "DNL", "DBV", "DKV", "DCH", "TON", "TIN", "NTD", "MNC", "PNK", "SON"],
-    "chua_su_dung": ["BCS", "DCS", "NCS"]
+    "nong_nghiep": [
+      "LUC",
+      "LUK",
+      "BHK",
+      "CLN",
+      "RSX",
+      "RPH",
+      "RDD",
+      "NTS",
+      "LMU",
+      "NKH",
+      "CNK",
+      "HNK"
+    ],
+    "phi_nong_nghiep": [
+      "ONT",
+      "ODT",
+      "TSC",
+      "CQP",
+      "CAN",
+      "DSN",
+      "DVH",
+      "DXH",
+      "DYT",
+      "DGD",
+      "DTT",
+      "SKK",
+      "SKN",
+      "SKC",
+      "SKS",
+      "TMD",
+      "DGT",
+      "DTL",
+      "DNL",
+      "DBV",
+      "DKV",
+      "DCH",
+      "TON",
+      "TIN",
+      "NTD",
+      "MNC",
+      "PNK",
+      "SON"
+    ],
+    "chua_su_dung": [
+      "BCS",
+      "DCS",
+      "NCS"
+    ]
   },
   "added_by_software_note": "HNK (thấy trong video, ví dụ ánh xạ BHK->HNK) và SON (thấy trong video ở phân lớp SON->L31) được thêm để không báo lỗi giả; đánh dấu cần xác minh.",
   "allow_combined_codes": true,
@@ -14,9 +60,19 @@
     "approval_status": "NOT_APPROVED",
     "note": "Ánh xạ chỉ được áp dụng khi người dùng phê duyệt (Master Prompt Tab 2). Hiện chỉ dùng để GỢI Ý.",
     "items": [
-      {"from": "BHK", "to": "HNK"},
-      {"from": "ONT+BHK", "to": "ONT+HNK"},
-      {"from": "ODT+BHK", "to": "ODT+HNK"}
+      {
+        "from": "BHK",
+        "to": "HNK"
+      },
+      {
+        "from": "ONT+BHK",
+        "to": "ONT+HNK"
+      },
+      {
+        "from": "ODT+BHK",
+        "to": "ODT+HNK"
+      }
     ]
-  }
+  },
+  "legacy_code_policy": "Mã hệ cũ (vd N, M, 1L, Ao, Hg, GT, T trên DC8) chỉ được BÁO; người dùng tự nhập mã mới (quyết định 21/11/2026)."
 }

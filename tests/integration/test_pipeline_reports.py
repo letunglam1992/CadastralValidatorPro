@@ -40,7 +40,7 @@ def test_full_pipeline(exchange_dir, tmp_path):
     results, info = run_check(CheckOptions(inputs=[exchange_dir], out_dir=out, crs_profile_id="VN2000_TM3_104",
                                            crs_confirmed=True))
     st = {r.sheet_id: r.status for r in results}
-    assert st == {"DC1": "OK", "DC2": "CAN_XEM", "DC3": "DUNG_TIEN_KIEM", "HONG": "KHONG_DOC_DUOC"}
+    assert st == {"DC1": "OK", "DC2": "CO_LOI", "DC3": "DUNG_TIEN_KIEM", "HONG": "KHONG_DOC_DUOC"}
     # nguồn không bị thay đổi
     assert {p.name: p.read_bytes() for p in exchange_dir.iterdir()} == before
 

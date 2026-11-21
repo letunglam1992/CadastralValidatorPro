@@ -30,6 +30,9 @@ def main(argv=None) -> int:
     c.add_argument("--field", action="append", default=[], help="Ánh xạ trường SHP/GML, vd parcel_no=SoThua")
     c.add_argument("--dbf-encoding")
     c.add_argument("--gml-swap-xy", action="store_true")
+    c.add_argument("--area-ref", choices=["grid", "ellipsoid", "ground"], default="grid",
+                   help="Mặt tính diện tích ghi trên nhãn: mặt phẳng chiếu / ellipsoid / mặt đất thực")
+    c.add_argument("--mean-height", type=float, help="Độ cao trung bình khu đo (m) khi --area-ref ground")
     c.add_argument("--levels", type=Path, help="Hồ sơ Level (vd config/level_profiles/dc8_phieng_luong.json)")
     p = sub.add_parser("probe", help="Khảo sát DGN")
     p.add_argument("inputs", nargs="+", type=Path)
@@ -65,7 +68,7 @@ def main(argv=None) -> int:
     o = CheckOptions(inputs=a.inputs, out_dir=a.out, rulepack=a.rulepack, scale=a.scale,
                      crs_profile_id=a.crs_profile, crs_confirmed=a.confirm_crs, html=not a.no_html,
                      field_map=fm, dbf_encoding=a.dbf_encoding, gml_swap_xy=a.gml_swap_xy,
-                     levels_path=a.levels)
+                     levels_path=a.levels, area_reference=a.area_ref, mean_height_m=a.mean_height)
     results, info = run_check(o, progress=lambda k, n, name: print(f"[{k}/{n}] {name}"))
     for r in results:
         print(f"  {r.file_name}: {r.status} — lỗi {r.count('error')}, cần xem {r.count('warning')}"

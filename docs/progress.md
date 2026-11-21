@@ -38,3 +38,9 @@
 - Người dùng xác nhận KTT Sơn La 104°00' → `VN2000_TM3_104` = VERIFIED_PARTIAL (chưa ghi số hiệu văn bản nguồn).
 - Diện tích DC8 (64 thửa có đúng 1 số thửa + 1 diện tích): lệch tương đối trung vị 0,019%, nhãn luôn LỚN hơn hình học ~1,9×10⁻⁴ ⇒ **sai khác hệ thống** cỡ k² của phép chiếu (k0 = 0,9999 → k² ≈ 0,9998): nghi diện tích nhãn tính theo mặt ellipsoid/thực địa hoặc phép chiếu khác. Cần người dùng xác nhận quy ước; KHÔNG tự hiệu chỉnh. Ngoại lệ: thửa 45 lệch +44 m² (2,86%).
 - 1:5000: rule pack chưa có ngưỡng hạn sai diện tích (Bo quy tac.json để trống) → AREA-001 không chạy.
+
+## Lượt 5 — 21/11/2026: hạn sai diện tích TT 26/2024
+- Người dùng: tỷ lệ DC8 = 1:5000; diện tích nhãn theo mặt đất thực; ngưỡng theo TT 26/2024 (cung cấp .docx); mã đất cũ chỉ báo, người dùng tự nhập mã mới.
+- Thêm `domain/area_tolerance.py` (Phụ lục 04, 6 tỷ lệ), `domain/area_reference.py` (grid/ellipsoid/ground), tùy chọn `--area-ref`, `--mean-height`; Excel thêm cột "Mã loại đất mới (người dùng nhập)".
+- Sửa lỗi: vùng có 2 nhãn diện tích từng bị so diện tích với nhãn đầu tiên (DC8 thửa 9, 26) → nay chỉ báo TRUNG_NHAN.
+- DC8 (mặt đất, chưa có h): 1 lỗi diện tích — thửa 45 lệch 44,16 m² > hạn sai 8,57 m². Sai khác hệ thống ~0,02% của các thửa khác nằm trong hạn sai. 66 test PASS.
