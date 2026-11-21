@@ -1,2 +1,2 @@
-*.bas text eol=crlf
+*.bas -text
 *.bat text eol=crlf
